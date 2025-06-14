@@ -1,7 +1,5 @@
 use dioxus::prelude::*;
 
-const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
-
 fn main() {
     dioxus::launch(App);
 }
@@ -9,9 +7,9 @@ fn main() {
 #[component]
 fn App() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
-            class: "bg-base-100 w-screen h-screen",
+            class: "bg-blue-100 w-screen h-screen",
             "hi"
         }
     }
