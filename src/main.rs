@@ -9,6 +9,7 @@ use tracing_subscriber::FmtSubscriber;
 use crate::{components::timer::Timer, window::set_transparent_titlebar};
 
 mod components;
+mod ui;
 mod window;
 
 fn main() {

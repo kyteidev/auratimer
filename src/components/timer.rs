@@ -2,13 +2,59 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn Timer() -> Element {
-    let mut hovering = use_signal(|| false);
+    let mut timer_running = use_signal(|| false);
+    let mut seconds_remaining = use_signal(|| 25 * 60);
+
+    let formatted_time = {
+        let minutes = *seconds_remaining.read() / 60;
+        let seconds = *seconds_remaining.read() % 60;
+        format!("{:02}:{:02}", minutes, seconds)
+    };
+
+    let toggle_timer = move |_| {
+        if !*timer_running.read() {
+            if *seconds_remaining.read() == 0 {
+                seconds_remaining.set(25 * 60);
+            }
+            timer_running.set(true);
+        } else {
+            timer_running.set(false);
+        }
+    };
+
+    use_effect(move || {
+        if *timer_running.read() {
+            spawn(async move {
+                let interval = std::time::Duration::from_millis(1000);
+                let mut interval = tokio::time::interval(interval);
+
+                while *seconds_remaining.read() > 0 {
+                    interval.tick().await;
+                    if !*timer_running.read() {
+                        break;
+                    }
+                    let current = *seconds_remaining.read();
+                    seconds_remaining.set(current - 1);
+                }
+
+                if *seconds_remaining.read() == 0 {
+                    timer_running.set(false);
+                }
+            });
+        }
+        ()
+    });
+
     rsx! {
         div {
-            class: "bg-transparent hover:bg-blue-100 hover:opacity-50 w-3/5 h-2/5 rounded-lg text-[10rem] content-center text-center",
-            onmouseenter: move |_| hovering.set(true),
-            onmouseleave: move |_| hovering.set(false),
-            "25:00"
+            class: "relative bg-transparent w-3/5 h-2/5 rounded-lg text-[10rem] content-center text-center items-center",
+            div {
+                class: "transition duration-100 absolute top-0 left-0 w-full h-full opacity-10 rounded-lg bg-transparent hover:bg-gray-500 z-10 cursor-default hover:cursor-pointer",
+                onclick: toggle_timer,
+            }
+            p {
+                "{formatted_time}"
+            }
         }
     }
 }
