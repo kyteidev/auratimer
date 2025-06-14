@@ -6,7 +6,10 @@ use objc2::msg_send;
 use tracing::error;
 use tracing_subscriber::FmtSubscriber;
 
-use crate::{components::timer::Timer, window::set_transparent_titlebar};
+use crate::{
+    components::timer::Timer,
+    window::{set_transparent_titlebar, WindowDragArea},
+};
 
 mod components;
 mod ui;
@@ -33,6 +36,7 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
             class: "bg-blue-200 w-screen h-screen select-none flex flex-col",
+            WindowDragArea {}
             div {
                 class: "flex-grow flex items-center justify-center",
                 Timer {}
