@@ -1,5 +1,2 @@
-body {
-    background-color: #eef4ff;
-    color: #4587ff;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
+@import "tailwindcss";
+@source "./src/**/*.{rs,html,css}";
