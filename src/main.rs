@@ -6,8 +6,9 @@ use objc2::msg_send;
 use tracing::error;
 use tracing_subscriber::FmtSubscriber;
 
-use crate::window::set_transparent_titlebar;
+use crate::{components::timer::Timer, window::set_transparent_titlebar};
 
+mod components;
 mod window;
 
 fn main() {
@@ -30,8 +31,11 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
-            class: "bg-blue-100 w-screen h-screen select-none",
-            "hi"
+            class: "bg-blue-200 w-screen h-screen select-none flex flex-col",
+            div {
+                class: "flex-grow flex items-center justify-center",
+                Timer {}
+            }
         }
     }
 }
