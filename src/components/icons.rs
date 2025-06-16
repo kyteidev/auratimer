@@ -13,7 +13,6 @@ pub struct Props {
     icon_type: IconType,
     class: String,
     opacity: f32,
-    color: String,
     size: String,
 }
 
@@ -39,7 +38,6 @@ pub fn Icon(props: Props) -> Element {
         svg {
             xmlns: "http://www.w3.org/2000/svg",
             view_box: "0 0 24 24",
-            fill: "{props.color}",
             class: "{props.class}",
             width: "{props.size}",
             height: "{props.size}",

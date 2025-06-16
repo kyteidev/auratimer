@@ -35,7 +35,7 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
-            class: "bg-blue-200 w-screen h-screen select-none flex flex-col",
+            class: "bg-blue-200 text-blue-600 w-screen h-screen select-none flex flex-col",
             WindowDragArea {}
             div {
                 class: "flex-grow flex items-center justify-center",
