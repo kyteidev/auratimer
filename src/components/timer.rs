@@ -2,47 +2,52 @@ use dioxus::prelude::*;
 
 use crate::components::icons::{Icon, IconType};
 
+static TIMER_RUNNING: GlobalSignal<bool> = GlobalSignal::new(|| false);
+static SECONDS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| 25 * 60);
+
+pub fn clear_timer() {
+    *TIMER_RUNNING.write() = false;
+    *SECONDS_REMAINING.write() = 25 * 60;
+}
+
 #[component]
 pub fn Timer() -> Element {
-    let mut timer_running = use_signal(|| false);
-    let mut seconds_remaining = use_signal(|| 25 * 60);
-
     let mut hovering = use_signal(|| false);
 
     let formatted_time = {
-        let minutes = *seconds_remaining.read() / 60;
-        let seconds = *seconds_remaining.read() % 60;
+        let minutes = *SECONDS_REMAINING.read() / 60;
+        let seconds = *SECONDS_REMAINING.read() % 60;
         format!("{:02}:{:02}", minutes, seconds)
     };
 
     let toggle_timer = move |_| {
-        if !*timer_running.read() {
-            if *seconds_remaining.read() == 0 {
-                seconds_remaining.set(25 * 60);
+        if !*TIMER_RUNNING.read() {
+            if *SECONDS_REMAINING.read() == 0 {
+                *SECONDS_REMAINING.write() = 25 * 60;
             }
-            timer_running.set(true);
+            *TIMER_RUNNING.write() = true;
         } else {
-            timer_running.set(false);
+            *TIMER_RUNNING.write() = false;
         }
     };
 
     use_effect(move || {
-        if *timer_running.read() {
+        if *TIMER_RUNNING.read() {
             spawn(async move {
                 let interval = std::time::Duration::from_millis(1000);
                 let mut interval = tokio::time::interval(interval);
 
-                while *seconds_remaining.read() > 0 {
+                while *SECONDS_REMAINING.read() > 0 {
                     interval.tick().await;
-                    if !*timer_running.read() {
+                    if !*TIMER_RUNNING.read() {
                         break;
                     }
-                    let current = *seconds_remaining.read();
-                    seconds_remaining.set(current - 1);
+                    let current = *SECONDS_REMAINING.read();
+                    *SECONDS_REMAINING.write() = current - 1;
                 }
 
-                if *seconds_remaining.read() == 0 {
-                    timer_running.set(false);
+                if *SECONDS_REMAINING.read() == 0 {
+                    *TIMER_RUNNING.write() = false;
                 }
             });
         }
@@ -61,8 +66,8 @@ pub fn Timer() -> Element {
                 onmouseleave: move |_| hovering.set(false),
             }
             Icon {
-                icon_type: if *timer_running.read() { IconType::Pause } else { IconType::Start },
-                class: "transition duration-200 absolute fill-blue-600",
+                icon_type: if *TIMER_RUNNING.read() { IconType::Pause } else { IconType::Start },
+                class: "transition duration-200 absolute fill-blue-500",
                 opacity: if *hovering.read() { 1.0 } else { 0.0 },
                 size: "96px",
             }

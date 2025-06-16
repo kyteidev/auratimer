@@ -7,7 +7,11 @@ use tracing::error;
 use tracing_subscriber::FmtSubscriber;
 
 use crate::{
-    components::timer::Timer,
+    components::{
+        icons::IconType,
+        timer::{clear_timer, Timer},
+    },
+    ui::icon_button::IconButton,
     window::{set_transparent_titlebar, WindowDragArea},
 };
 
@@ -35,11 +39,19 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
-            class: "bg-blue-200 text-blue-600 w-screen h-screen select-none flex flex-col",
+            class: "bg-blue-200 text-blue-500 w-screen h-screen select-none flex flex-col",
             WindowDragArea {}
             div {
                 class: "flex-grow flex items-center justify-center",
                 Timer {}
+            }
+            div {
+                class: "absolute bottom-0 left-0 flex items-center justify-center w-full h-1/5 bg-",
+                IconButton {
+                    icon_type: IconType::Restart,
+                    size: "6rem",
+                    action: clear_timer,
+                }
             }
         }
     }

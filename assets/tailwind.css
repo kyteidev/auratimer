@@ -9,7 +9,6 @@
       "Courier New", monospace;
     --color-blue-200: oklch(88.2% 0.059 254.128);
     --color-blue-500: oklch(62.3% 0.214 259.815);
-    --color-blue-600: oklch(54.6% 0.245 262.881);
     --spacing: 0.25rem;
     --radius-lg: 0.5rem;
     --default-transition-duration: 150ms;
@@ -170,8 +169,14 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .top-0 {
     top: calc(var(--spacing) * 0);
+  }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
   }
   .left-0 {
     left: calc(var(--spacing) * 0);
@@ -182,14 +187,14 @@
   .flex {
     display: flex;
   }
+  .h-1\/5 {
+    height: calc(1/5 * 100%);
+  }
   .h-2\/5 {
     height: calc(2/5 * 100%);
   }
   .h-12 {
     height: calc(var(--spacing) * 12);
-  }
-  .h-24 {
-    height: calc(var(--spacing) * 24);
   }
   .h-full {
     height: 100%;
@@ -200,9 +205,6 @@
   .w-3\/5 {
     width: calc(3/5 * 100%);
   }
-  .w-24 {
-    width: calc(var(--spacing) * 24);
-  }
   .w-full {
     width: 100%;
   }
@@ -211,6 +213,9 @@
   }
   .flex-grow {
     flex-grow: 1;
+  }
+  .cursor-default {
+    cursor: default;
   }
   .cursor-pointer {
     cursor: pointer;
@@ -239,14 +244,20 @@
   .bg-transparent {
     background-color: transparent;
   }
-  .fill-blue-600 {
-    fill: var(--color-blue-600);
+  .fill-blue-500 {
+    fill: var(--color-blue-500);
+  }
+  .stroke-blue-500 {
+    stroke: var(--color-blue-500);
   }
   .text-\[14vw\] {
     font-size: 14vw;
   }
-  .text-blue-600 {
-    color: var(--color-blue-600);
+  .text-blue-500 {
+    color: var(--color-blue-500);
+  }
+  .opacity-0 {
+    opacity: 0%;
   }
   .opacity-10 {
     opacity: 10%;
@@ -264,10 +275,24 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  .hover\:cursor-pointer {
+    &:hover {
+      @media (hover: hover) {
+        cursor: pointer;
+      }
+    }
+  }
   .hover\:bg-blue-500 {
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-blue-500);
+      }
+    }
+  }
+  .hover\:opacity-10 {
+    &:hover {
+      @media (hover: hover) {
+        opacity: 10%;
       }
     }
   }
