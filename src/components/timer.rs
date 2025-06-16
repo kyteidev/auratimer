@@ -58,7 +58,7 @@ pub fn Timer() -> Element {
 
     rsx! {
         div {
-            class: "relative bg-transparent w-3/5 h-2/5 rounded-lg text-[14vw] flex items-center justify-center",
+            class: "relative bg-transparent w-3/5 h-2/5 rounded-lg text-[10rem] flex items-center justify-center",
             div {
                 class: "transition duration-200 absolute top-0 left-0 w-full h-full opacity-10 rounded-lg bg-transparent hover:bg-blue-500 z-10 cursor-pointer flex items-center justify-center",
                 onclick: toggle_timer,

@@ -46,7 +46,7 @@ fn App() -> Element {
                 Timer {}
             }
             div {
-                class: "absolute bottom-0 left-0 flex items-center justify-center w-full h-1/5 bg-",
+                class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
                 IconButton {
                     icon_type: IconType::Restart,
                     size: "6rem",
