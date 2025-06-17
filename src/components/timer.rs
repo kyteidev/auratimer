@@ -1,6 +1,7 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use dioxus::prelude::*;
+use tokio::time::Instant;
 
 use crate::components::icons::{Icon, IconType};
 
@@ -17,28 +18,20 @@ pub fn clear_timer() {
 #[component]
 pub fn Timer() -> Element {
     let mut hovering = use_signal(|| false);
-    let mut start_time = use_signal(|| 0);
+    let mut start_time = use_signal(|| None::<Instant>);
 
     let formatted_time = {
         let minutes = *MILLIS_REMAINING.read() / 1000 / 60;
         let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
         format!("{:02}:{:02}", minutes, seconds)
     };
-
-    fn get_current_time() -> u128 {
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis()
-    }
-
     let toggle_timer = move |_| {
         if !*TIMER_RUNNING.read() {
             if *MILLIS_REMAINING.read() == 0 {
                 *MILLIS_REMAINING.write() = DURATION;
             }
+            start_time.set(Some(Instant::now()));
             *TIMER_RUNNING.write() = true;
-            *start_time.write() = get_current_time();
         } else {
             *TIMER_RUNNING.write() = false;
         }
@@ -46,23 +39,27 @@ pub fn Timer() -> Element {
 
     use_effect(move || {
         if *TIMER_RUNNING.read() {
-            spawn(async move {
-                let interval = std::time::Duration::from_millis(100); // calculate time every 100ms
-                let mut interval = tokio::time::interval(interval);
+            if let Some(timer_start) = *start_time.peek() {
+                spawn(async move {
+                    let interval = Duration::from_millis(100); // update timer every 100ms for accuracy
+                    let mut interval = tokio::time::interval(interval);
 
-                let remaining_time = *MILLIS_REMAINING.read();
+                    let remaining_time = *MILLIS_REMAINING.peek();
 
-                while *MILLIS_REMAINING.read() > 0 {
-                    interval.tick().await;
-                    if !*TIMER_RUNNING.read() {
-                        break;
+                    while *MILLIS_REMAINING.peek() > 0 {
+                        interval.tick().await;
+                        if !*TIMER_RUNNING.peek() {
+                            break;
+                        }
+                        let elapsed_time = timer_start.elapsed();
+                        let remaining_time = Duration::from_millis(remaining_time as u64)
+                            .saturating_sub(elapsed_time)
+                            .as_millis();
+                        *MILLIS_REMAINING.write() = remaining_time as u32;
                     }
-                    let elapsed_time = get_current_time() - *start_time.peek();
-                    let remaining_time = remaining_time - elapsed_time as u32;
-                    *MILLIS_REMAINING.write() = remaining_time;
-                }
-                *TIMER_RUNNING.write() = false;
-            });
+                    *TIMER_RUNNING.write() = false;
+                });
+            }
         }
     });
 
