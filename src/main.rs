@@ -11,11 +11,13 @@ use crate::{
         icons::IconType,
         timer::{clear_timer, Timer},
     },
+    state::TIMER_EXPIRED,
     ui::icon_button::IconButton,
     window::{set_transparent_titlebar, WindowDragArea},
 };
 
 mod components;
+mod state;
 mod ui;
 mod window;
 
@@ -41,10 +43,12 @@ fn App() -> Element {
         set_transparent_titlebar(ns_window);
     }
 
+    let timer_expired = *TIMER_EXPIRED.read();
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
-            class: "bg-blue-200 text-blue-500 w-screen h-screen select-none flex flex-col",
+            class: format!("w-screen h-screen select-none flex flex-col {}", if timer_expired { "bg-red-200 text-red-500" } else { "bg-blue-200 text-blue-500" }),
             WindowDragArea {}
             div {
                 class: "flex-grow flex items-center justify-center",

@@ -7,8 +7,11 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-200: oklch(88.5% 0.062 18.334);
+    --color-red-500: oklch(63.7% 0.237 25.331);
     --color-blue-200: oklch(88.2% 0.059 254.128);
     --color-blue-500: oklch(62.3% 0.214 259.815);
+    --color-gray-200: oklch(92.8% 0.006 264.531);
     --spacing: 0.25rem;
     --radius-lg: 0.5rem;
     --default-transition-duration: 150ms;
@@ -244,14 +247,26 @@
   .bg-blue-500 {
     background-color: var(--color-blue-500);
   }
+  .bg-red-200 {
+    background-color: var(--color-red-200);
+  }
+  .bg-red-500 {
+    background-color: var(--color-red-500);
+  }
   .bg-transparent {
     background-color: transparent;
   }
   .fill-blue-500 {
     fill: var(--color-blue-500);
   }
+  .fill-red-500 {
+    fill: var(--color-red-500);
+  }
   .stroke-blue-500 {
     stroke: var(--color-blue-500);
+  }
+  .stroke-red-500 {
+    stroke: var(--color-red-500);
   }
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
@@ -261,6 +276,9 @@
   }
   .text-blue-500 {
     color: var(--color-blue-500);
+  }
+  .text-red-500 {
+    color: var(--color-red-500);
   }
   .opacity-0 {
     opacity: 0%;
@@ -292,6 +310,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-blue-500);
+      }
+    }
+  }
+  .hover\:bg-red-500 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-red-500);
       }
     }
   }

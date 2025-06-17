@@ -3,7 +3,10 @@ use std::time::Duration;
 use dioxus::prelude::*;
 use tokio::time::Instant;
 
-use crate::components::icons::{Icon, IconType};
+use crate::{
+    components::icons::{Icon, IconType},
+    state::TIMER_EXPIRED,
+};
 
 const DURATION: u32 = 25 * 60 * 1000;
 
@@ -13,6 +16,7 @@ static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| DURATION);
 pub fn clear_timer() {
     *TIMER_RUNNING.write() = false;
     *MILLIS_REMAINING.write() = DURATION;
+    *TIMER_EXPIRED.write() = false;
 }
 
 #[component]
@@ -29,6 +33,7 @@ pub fn Timer() -> Element {
         if !*TIMER_RUNNING.read() {
             if *MILLIS_REMAINING.read() == 0 {
                 *MILLIS_REMAINING.write() = DURATION;
+                *TIMER_EXPIRED.write() = false;
             }
             start_time.set(Some(Instant::now()));
             *TIMER_RUNNING.write() = true;
@@ -46,7 +51,7 @@ pub fn Timer() -> Element {
 
                     let remaining_time = *MILLIS_REMAINING.peek();
 
-                    while *MILLIS_REMAINING.peek() > 0 {
+                    while remaining_time > 0 {
                         interval.tick().await;
                         if !*TIMER_RUNNING.peek() {
                             break;
@@ -56,8 +61,12 @@ pub fn Timer() -> Element {
                             .saturating_sub(elapsed_time)
                             .as_millis();
                         *MILLIS_REMAINING.write() = remaining_time as u32;
+                        if remaining_time == 0 {
+                            *TIMER_EXPIRED.write() = true;
+                            *TIMER_RUNNING.write() = false;
+                            break;
+                        }
                     }
-                    *TIMER_RUNNING.write() = false;
                 });
             }
         }
@@ -65,18 +74,20 @@ pub fn Timer() -> Element {
 
     let opacity = if *hovering.read() { 0.1 } else { 1.0 };
 
+    let timer_expired = *TIMER_EXPIRED.read();
+
     rsx! {
         div {
             class: "relative bg-transparent w-3/5 h-2/5 rounded-lg text-[10rem] flex items-center justify-center",
             div {
-                class: "transition duration-200 absolute top-0 left-0 w-full h-full opacity-10 rounded-lg bg-transparent hover:bg-blue-500 z-10 cursor-pointer flex items-center justify-center",
+                class: format!("transition duration-200 absolute top-0 left-0 w-full h-full opacity-10 rounded-lg bg-transparent z-10 cursor-pointer flex items-center justify-center {}", if timer_expired { "hover:bg-red-500" } else { "hover:bg-blue-500" }),
                 onclick: toggle_timer,
                 onmouseenter: move |_| hovering.set(true),
                 onmouseleave: move |_| hovering.set(false),
             }
             Icon {
                 icon_type: if *TIMER_RUNNING.read() { IconType::Pause } else { IconType::Start },
-                class: "transition duration-200 absolute fill-blue-500",
+                class: format!("transition duration-200 absolute {}", if timer_expired { "fill-red-500" } else { "fill-blue-500" }),
                 opacity: if *hovering.read() { 1.0 } else { 0.0 },
                 size: "96px",
             }
