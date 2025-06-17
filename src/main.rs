@@ -1,5 +1,5 @@
 use dioxus::{
-    desktop::{tao::platform::macos::WindowExtMacOS, window},
+    desktop::{tao::platform::macos::WindowExtMacOS, window, Config, LogicalSize, WindowBuilder},
     prelude::*,
 };
 use objc2::msg_send;
@@ -22,7 +22,12 @@ mod window;
 fn main() {
     let _ = FmtSubscriber::builder().init();
 
-    dioxus::LaunchBuilder::desktop().launch(App);
+    let config = Config::new()
+        .with_window(WindowBuilder::new().with_inner_size(LogicalSize::new(900.0, 600.0)));
+
+    dioxus::LaunchBuilder::desktop()
+        .with_cfg(config)
+        .launch(App);
 }
 
 #[component]
