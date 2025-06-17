@@ -5,6 +5,11 @@
 # HTML title tag content
 title = "AuraTimer"
 
+[bundle]
+identifier = "dev.kyteidev"
+publisher = "kyteidev"
+icon = ["assets/icon.icns"]
+
 # include `assets` in web platform
 [web.resource]
 
