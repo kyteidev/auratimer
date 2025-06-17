@@ -1,31 +1,44 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use dioxus::prelude::*;
 
 use crate::components::icons::{Icon, IconType};
 
+const DURATION: u32 = 25 * 60 * 1000;
+
 static TIMER_RUNNING: GlobalSignal<bool> = GlobalSignal::new(|| false);
-static SECONDS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| 25 * 60);
+static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| DURATION);
 
 pub fn clear_timer() {
     *TIMER_RUNNING.write() = false;
-    *SECONDS_REMAINING.write() = 25 * 60;
+    *MILLIS_REMAINING.write() = DURATION;
 }
 
 #[component]
 pub fn Timer() -> Element {
     let mut hovering = use_signal(|| false);
+    let mut start_time = use_signal(|| 0);
 
     let formatted_time = {
-        let minutes = *SECONDS_REMAINING.read() / 60;
-        let seconds = *SECONDS_REMAINING.read() % 60;
+        let minutes = *MILLIS_REMAINING.read() / 1000 / 60;
+        let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
         format!("{:02}:{:02}", minutes, seconds)
     };
 
+    fn get_current_time() -> u128 {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+    }
+
     let toggle_timer = move |_| {
         if !*TIMER_RUNNING.read() {
-            if *SECONDS_REMAINING.read() == 0 {
-                *SECONDS_REMAINING.write() = 25 * 60;
+            if *MILLIS_REMAINING.read() == 0 {
+                *MILLIS_REMAINING.write() = DURATION;
             }
             *TIMER_RUNNING.write() = true;
+            *start_time.write() = get_current_time();
         } else {
             *TIMER_RUNNING.write() = false;
         }
@@ -34,24 +47,23 @@ pub fn Timer() -> Element {
     use_effect(move || {
         if *TIMER_RUNNING.read() {
             spawn(async move {
-                let interval = std::time::Duration::from_millis(1000);
+                let interval = std::time::Duration::from_millis(100); // calculate time every 100ms
                 let mut interval = tokio::time::interval(interval);
 
-                while *SECONDS_REMAINING.read() > 0 {
+                let remaining_time = *MILLIS_REMAINING.read();
+
+                while *MILLIS_REMAINING.read() > 0 {
                     interval.tick().await;
                     if !*TIMER_RUNNING.read() {
                         break;
                     }
-                    let current = *SECONDS_REMAINING.read();
-                    *SECONDS_REMAINING.write() = current - 1;
+                    let elapsed_time = get_current_time() - *start_time.peek();
+                    let remaining_time = remaining_time - elapsed_time as u32;
+                    *MILLIS_REMAINING.write() = remaining_time;
                 }
-
-                if *SECONDS_REMAINING.read() == 0 {
-                    *TIMER_RUNNING.write() = false;
-                }
+                *TIMER_RUNNING.write() = false;
             });
         }
-        ()
     });
 
     let opacity = if *hovering.read() { 0.1 } else { 1.0 };
