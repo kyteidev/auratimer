@@ -1,3 +1,5 @@
+mod sound;
+
 use dioxus::{
     desktop::{tao::platform::macos::WindowExtMacOS, window, Config, LogicalSize, WindowBuilder},
     prelude::*,

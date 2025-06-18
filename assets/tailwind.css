@@ -11,7 +11,6 @@
     --color-red-500: oklch(63.7% 0.237 25.331);
     --color-blue-200: oklch(88.2% 0.059 254.128);
     --color-blue-500: oklch(62.3% 0.214 259.815);
-    --color-gray-200: oklch(92.8% 0.006 264.531);
     --spacing: 0.25rem;
     --radius-lg: 0.5rem;
     --default-transition-duration: 150ms;

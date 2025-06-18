@@ -5,6 +5,7 @@ use tokio::time::Instant;
 
 use crate::{
     components::icons::{Icon, IconType},
+    sound::play_alarm,
     state::TIMER_EXPIRED,
 };
 
@@ -64,6 +65,7 @@ pub fn Timer() -> Element {
                         if remaining_time == 0 {
                             *TIMER_EXPIRED.write() = true;
                             *TIMER_RUNNING.write() = false;
+                            play_alarm();
                             break;
                         }
                     }
