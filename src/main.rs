@@ -58,6 +58,7 @@ fn App() -> Element {
                 class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
                 IconButton {
                     icon_type: IconType::Restart,
+                    title: "Restart timer",
                     size: "6rem",
                     action: clear_timer,
                 }

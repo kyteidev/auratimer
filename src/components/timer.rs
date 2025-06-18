@@ -81,6 +81,7 @@ pub fn Timer() -> Element {
             class: "relative bg-transparent w-3/5 h-2/5 rounded-lg text-[10rem] flex items-center justify-center",
             div {
                 class: format!("transition duration-200 absolute top-0 left-0 w-full h-full opacity-10 rounded-lg bg-transparent z-10 cursor-pointer flex items-center justify-center {}", if timer_expired { "hover:bg-red-500" } else { "hover:bg-blue-500" }),
+                title: "Toggle timer",
                 onclick: toggle_timer,
                 onmouseenter: move |_| hovering.set(true),
                 onmouseleave: move |_| hovering.set(false),

@@ -10,6 +10,7 @@ pub struct Props {
     icon_type: IconType,
     size: String,
     action: fn(),
+    title: String,
 }
 
 #[component]
@@ -31,6 +32,7 @@ pub fn IconButton(props: Props) -> Element {
             height: size.clone(),
             button {
                 class: format!("transition duration-200 rounded-full opacity-0 hover:opacity-10 z-10 cursor-default hover:cursor-pointer {}", if timer_expired { "bg-red-500" } else { "bg-blue-500" }),
+                title: props.title,
                 width: size.clone(),
                 height: size,
                 onclick: move |_| (props.action)(),
