@@ -52,21 +52,23 @@ pub fn Timer() -> Element {
 
                     let remaining_time = *MILLIS_REMAINING.peek();
 
-                    while remaining_time > 0 {
-                        interval.tick().await;
-                        if !*TIMER_RUNNING.peek() {
-                            break;
-                        }
-                        let elapsed_time = timer_start.elapsed();
-                        let remaining_time = Duration::from_millis(remaining_time as u64)
-                            .saturating_sub(elapsed_time)
-                            .as_millis();
-                        *MILLIS_REMAINING.write() = remaining_time as u32;
-                        if remaining_time == 0 {
-                            *TIMER_EXPIRED.write() = true;
-                            *TIMER_RUNNING.write() = false;
-                            play_alarm();
-                            break;
+                    if remaining_time > 0 {
+                        loop {
+                            interval.tick().await;
+                            if !*TIMER_RUNNING.peek() {
+                                break;
+                            }
+                            let elapsed_time = timer_start.elapsed();
+                            let remaining_time = Duration::from_millis(remaining_time as u64)
+                                .saturating_sub(elapsed_time)
+                                .as_millis();
+                            *MILLIS_REMAINING.write() = remaining_time as u32;
+                            if remaining_time == 0 {
+                                *TIMER_EXPIRED.write() = true;
+                                *TIMER_RUNNING.write() = false;
+                                play_alarm();
+                                break;
+                            }
                         }
                     }
                 });

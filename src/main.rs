@@ -24,7 +24,7 @@ mod ui;
 mod window;
 
 fn main() {
-    let _ = FmtSubscriber::builder().init();
+    FmtSubscriber::builder().init();
 
     let config = Config::new()
         .with_window(WindowBuilder::new().with_inner_size(LogicalSize::new(900.0, 600.0)));
