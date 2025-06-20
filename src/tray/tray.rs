@@ -10,16 +10,14 @@ use dioxus::prelude::spawn;
 use once_cell::sync::Lazy;
 use tokio::time::interval;
 use tracing::error;
-use tray_icon::{menu::Menu, TrayIconBuilder};
+use tray_icon::{
+    menu::{Menu, MenuEvent},
+    TrayIconBuilder,
+};
 
-pub enum UserEvent {
-    TrayIconEvent(tray_icon::TrayIconEvent),
-    MenuEvent(tray_icon::menu::MenuEvent),
-}
-
-pub static TRAY_EVENT_SENDER: Lazy<Mutex<Option<Sender<UserEvent>>>> =
+pub static TRAY_EVENT_SENDER: Lazy<Mutex<Option<Sender<MenuEvent>>>> =
     Lazy::new(|| Mutex::new(None));
-pub static TRAY_EVENT_RECEIVER: Lazy<Mutex<Option<Receiver<UserEvent>>>> =
+pub static TRAY_EVENT_RECEIVER: Lazy<Mutex<Option<Receiver<MenuEvent>>>> =
     Lazy::new(|| Mutex::new(None));
 
 thread_local! {
@@ -27,14 +25,9 @@ thread_local! {
 }
 
 pub fn init_tray_handler() {
-    tray_icon::TrayIconEvent::set_event_handler(Some(move |event| {
-        if let Some(sender) = TRAY_EVENT_SENDER.lock().unwrap().as_ref() {
-            let _ = sender.send(UserEvent::TrayIconEvent(event));
-        }
-    }));
     tray_icon::menu::MenuEvent::set_event_handler(Some(move |event| {
         if let Some(sender) = TRAY_EVENT_SENDER.lock().unwrap().as_ref() {
-            let _ = sender.send(UserEvent::MenuEvent(event));
+            let _ = sender.send(event);
         }
     }));
 }
@@ -46,15 +39,9 @@ pub fn init_tray_listener() {
             interval.tick().await;
             if let Some(receiver) = TRAY_EVENT_RECEIVER.lock().unwrap().as_ref() {
                 match receiver.try_recv() {
-                    Ok(UserEvent::MenuEvent(menu_event)) => {
+                    Ok(menu_event) => {
                         println!("RECEIVED: {}", menu_event.id().0);
                         match menu_event.id().0.as_str() {
-                            _ => {}
-                        }
-                    }
-                    Ok(UserEvent::TrayIconEvent(icon_event)) => {
-                        println!("RECEIVED: {}", icon_event.id().0);
-                        match icon_event.id().0.as_str() {
                             _ => {}
                         }
                     }

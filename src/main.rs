@@ -12,6 +12,7 @@ use dioxus::{
 use objc2::msg_send;
 use tracing::error;
 use tracing_subscriber::FmtSubscriber;
+use tray_icon::menu::MenuEvent;
 
 use crate::{
     components::{
@@ -20,8 +21,7 @@ use crate::{
     },
     state::TIMER_EXPIRED,
     tray::tray::{
-        init_tray, init_tray_handler, init_tray_listener, UserEvent, TRAY_EVENT_RECEIVER,
-        TRAY_EVENT_SENDER,
+        init_tray, init_tray_handler, init_tray_listener, TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER,
     },
     ui::icon_button::IconButton,
     window::{set_transparent_titlebar, WindowDragArea},
@@ -48,7 +48,7 @@ fn main() {
 #[component]
 fn App() -> Element {
     use_hook(|| {
-        let (tx, rx) = channel::<UserEvent>();
+        let (tx, rx) = channel::<MenuEvent>();
         *TRAY_EVENT_SENDER.lock().unwrap() = Some(tx);
         *TRAY_EVENT_RECEIVER.lock().unwrap() = Some(rx);
 
