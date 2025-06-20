@@ -7,6 +7,7 @@ use crate::{
     components::icons::{Icon, IconType},
     sound::play_alarm,
     state::TIMER_EXPIRED,
+    tray::tray::set_tray_title,
 };
 
 const DURATION: u32 = 25 * 60 * 1000;
@@ -28,6 +29,8 @@ pub fn Timer() -> Element {
     let formatted_time = {
         let minutes = *MILLIS_REMAINING.read() / 1000 / 60;
         let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
+        set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
+
         format!("{:02}:{:02}", minutes, seconds)
     };
     let toggle_timer = move |_| {
