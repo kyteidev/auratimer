@@ -8,10 +8,12 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "objc2 0.6.1",
+ "once_cell",
  "rodio",
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "tray-icon 0.20.1",
 ]
 
 [[package]]
@@ -1043,7 +1045,7 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tracing",
- "tray-icon",
+ "tray-icon 0.19.3",
  "urlencoding",
  "webbrowser",
  "wry",
@@ -2820,6 +2822,27 @@ dependencies = [
  "once_cell",
  "png",
  "thiserror 1.0.69",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "muda"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4de14a9b5d569ca68d7c891d613b390cf5ab4f851c77aaa2f9e435555d3d9492"
+dependencies = [
+ "crossbeam-channel",
+ "dpi",
+ "gtk",
+ "keyboard-types",
+ "libxdo",
+ "objc2 0.6.1",
+ "objc2-app-kit 0.3.1",
+ "objc2-core-foundation",
+ "objc2-foundation 0.3.1",
+ "once_cell",
+ "png",
+ "thiserror 2.0.12",
  "windows-sys 0.59.0",
 ]
 
@@ -4724,6 +4747,27 @@ dependencies = [
  "dirs",
  "libappindicator",
  "muda 0.15.3",
+ "objc2 0.6.1",
+ "objc2-app-kit 0.3.1",
+ "objc2-core-foundation",
+ "objc2-core-graphics",
+ "objc2-foundation 0.3.1",
+ "once_cell",
+ "png",
+ "thiserror 2.0.12",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "tray-icon"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f7eee98ec5c90daf179d55c20a49d8c0d043054ce7c26336c09a24d31f14fa0"
+dependencies = [
+ "crossbeam-channel",
+ "dirs",
+ "libappindicator",
+ "muda 0.16.1",
  "objc2 0.6.1",
  "objc2-app-kit 0.3.1",
  "objc2-core-foundation",
