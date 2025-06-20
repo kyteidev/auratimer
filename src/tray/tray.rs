@@ -7,7 +7,6 @@ use std::{
 };
 
 use dioxus::prelude::spawn;
-use once_cell::sync::Lazy;
 use tokio::time::interval;
 use tracing::error;
 use tray_icon::{
@@ -15,10 +14,8 @@ use tray_icon::{
     TrayIconBuilder,
 };
 
-pub static TRAY_EVENT_SENDER: Lazy<Mutex<Option<Sender<MenuEvent>>>> =
-    Lazy::new(|| Mutex::new(None));
-pub static TRAY_EVENT_RECEIVER: Lazy<Mutex<Option<Receiver<MenuEvent>>>> =
-    Lazy::new(|| Mutex::new(None));
+pub static TRAY_EVENT_SENDER: Mutex<Option<Sender<MenuEvent>>> = Mutex::new(None);
+pub static TRAY_EVENT_RECEIVER: Mutex<Option<Receiver<MenuEvent>>> = Mutex::new(None);
 
 thread_local! {
     static TRAY_ICON: Mutex<Option<tray_icon::TrayIcon>> = Mutex::new(None);

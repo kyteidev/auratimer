@@ -9,7 +9,6 @@ edition = "2021"
 [dependencies]
 dioxus = { version = "0.6.0", features = [] }
 objc2 = "0.6.1"
-once_cell = "1.21.3"
 rodio = "0.20.1"
 tokio = "1.45.1"
 tracing = "0.1.41"
