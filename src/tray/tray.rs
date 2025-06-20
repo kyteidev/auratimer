@@ -79,6 +79,7 @@ pub fn init_tray() {
         .build()
         .unwrap();
 
+    // tray_icon cannot be dropped, otherwise the system tray will disappear
     TRAY_ICON.with(|t| {
         *t.lock().unwrap() = Some(tray_icon);
     });
