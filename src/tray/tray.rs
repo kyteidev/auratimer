@@ -6,11 +6,19 @@ use std::{
     thread,
 };
 
+use dioxus::desktop::window;
 use tracing::error;
 use tray_icon::{TrayIconBuilder, TrayIconEvent};
 
+#[derive(Debug)]
+pub enum WindowCommand {
+    Show,
+}
+
 pub static TRAY_EVENT_SENDER: Mutex<Option<Sender<TrayIconEvent>>> = Mutex::new(None);
 pub static TRAY_EVENT_RECEIVER: Mutex<Option<Receiver<TrayIconEvent>>> = Mutex::new(None);
+pub static WINDOW_COMMAND_SENDER: Mutex<Option<Sender<WindowCommand>>> = Mutex::new(None);
+pub static WINDOW_COMMAND_RECEIVER: Mutex<Option<Receiver<WindowCommand>>> = Mutex::new(None);
 
 thread_local! {
     static TRAY_ICON: Mutex<Option<tray_icon::TrayIcon>> = Mutex::new(None);
@@ -25,28 +33,41 @@ pub fn init_tray_handler() {
 }
 
 pub fn init_tray_listener() {
-    thread::spawn(move || {
-        loop {
-            if let Some(receiver) = TRAY_EVENT_RECEIVER.lock().unwrap().as_ref() {
-                match receiver.recv() {
-                    Ok(tray_event) => {
-                        if let TrayIconEvent::Click {
-                            button: tray_icon::MouseButton::Left,
-                            button_state: tray_icon::MouseButtonState::Up,
-                            ..
-                        } = tray_event
-                        {
-                            // TODO: show app window if it's hidden
+    thread::spawn(move || loop {
+        if let Some(receiver) = TRAY_EVENT_RECEIVER.lock().unwrap().as_ref() {
+            match receiver.recv() {
+                Ok(tray_event) => {
+                    if let TrayIconEvent::Click {
+                        button: tray_icon::MouseButton::Left,
+                        button_state: tray_icon::MouseButtonState::Up,
+                        ..
+                    } = tray_event
+                    {
+                        if let Some(sender) = WINDOW_COMMAND_SENDER.lock().unwrap().as_ref() {
+                            let _ = sender.send(WindowCommand::Show);
                         }
                     }
-                    Err(_) => {
-                        error!("System tray receiver disconnected.");
-                        break;
-                    }
+                }
+                Err(_) => {
+                    error!("System tray receiver disconnected.");
+                    break;
                 }
             }
         }
     });
+}
+
+pub fn handle_window_commands() {
+    if let Some(receiver) = WINDOW_COMMAND_RECEIVER.lock().unwrap().as_ref() {
+        while let Ok(command) = receiver.try_recv() {
+            let handle = window();
+            match command {
+                WindowCommand::Show => {
+                    handle.set_visible(true);
+                }
+            }
+        }
+    }
 }
 
 use std::ffi::c_void;

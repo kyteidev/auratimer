@@ -21,7 +21,8 @@ use crate::{
     },
     state::TIMER_EXPIRED,
     tray::tray::{
-        init_tray, init_tray_handler, init_tray_listener, TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER,
+        handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
+        TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
     },
     ui::icon_button::IconButton,
     window::{set_transparent_titlebar, WindowDragArea},
@@ -52,6 +53,10 @@ fn App() -> Element {
         *TRAY_EVENT_SENDER.lock().unwrap() = Some(tx);
         *TRAY_EVENT_RECEIVER.lock().unwrap() = Some(rx);
 
+        let (window_tx, window_rx) = channel();
+        *WINDOW_COMMAND_SENDER.lock().unwrap() = Some(window_tx);
+        *WINDOW_COMMAND_RECEIVER.lock().unwrap() = Some(window_rx);
+
         init_tray();
         init_tray_handler();
         init_tray_listener();
@@ -63,6 +68,13 @@ fn App() -> Element {
                 error!("ns_window is null, unable to set transparent titlebar");
             }
             set_transparent_titlebar(ns_window);
+        }
+    });
+
+    use_future(move || async move {
+        loop {
+            handle_window_commands();
+            tokio::time::sleep(std::time::Duration::from_millis(200)).await;
         }
     });
 
