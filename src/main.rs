@@ -12,7 +12,7 @@ use dioxus::{
 use objc2::msg_send;
 use tracing::error;
 use tracing_subscriber::FmtSubscriber;
-use tray_icon::menu::MenuEvent;
+use tray_icon::TrayIconEvent;
 
 use crate::{
     components::{
@@ -48,7 +48,7 @@ fn main() {
 #[component]
 fn App() -> Element {
     use_hook(|| {
-        let (tx, rx) = channel::<MenuEvent>();
+        let (tx, rx) = channel::<TrayIconEvent>();
         *TRAY_EVENT_SENDER.lock().unwrap() = Some(tx);
         *TRAY_EVENT_RECEIVER.lock().unwrap() = Some(rx);
 

@@ -1,28 +1,23 @@
 use std::{
     sync::{
-        mpsc::{Receiver, Sender, TryRecvError},
+        mpsc::{Receiver, Sender},
         Mutex,
     },
-    time::Duration,
+    thread,
 };
 
-use dioxus::prelude::spawn;
-use tokio::time::interval;
 use tracing::error;
-use tray_icon::{
-    menu::{Menu, MenuEvent},
-    TrayIconBuilder,
-};
+use tray_icon::{TrayIconBuilder, TrayIconEvent};
 
-pub static TRAY_EVENT_SENDER: Mutex<Option<Sender<MenuEvent>>> = Mutex::new(None);
-pub static TRAY_EVENT_RECEIVER: Mutex<Option<Receiver<MenuEvent>>> = Mutex::new(None);
+pub static TRAY_EVENT_SENDER: Mutex<Option<Sender<TrayIconEvent>>> = Mutex::new(None);
+pub static TRAY_EVENT_RECEIVER: Mutex<Option<Receiver<TrayIconEvent>>> = Mutex::new(None);
 
 thread_local! {
     static TRAY_ICON: Mutex<Option<tray_icon::TrayIcon>> = Mutex::new(None);
 }
 
 pub fn init_tray_handler() {
-    tray_icon::menu::MenuEvent::set_event_handler(Some(move |event| {
+    tray_icon::TrayIconEvent::set_event_handler(Some(move |event| {
         if let Some(sender) = TRAY_EVENT_SENDER.lock().unwrap().as_ref() {
             let _ = sender.send(event);
         }
@@ -30,20 +25,21 @@ pub fn init_tray_handler() {
 }
 
 pub fn init_tray_listener() {
-    spawn(async move {
-        let mut interval = interval(Duration::from_millis(200));
+    thread::spawn(move || {
         loop {
-            interval.tick().await;
             if let Some(receiver) = TRAY_EVENT_RECEIVER.lock().unwrap().as_ref() {
-                match receiver.try_recv() {
-                    Ok(menu_event) => {
-                        println!("RECEIVED: {}", menu_event.id().0);
-                        match menu_event.id().0.as_str() {
-                            _ => {}
+                match receiver.recv() {
+                    Ok(tray_event) => {
+                        if let TrayIconEvent::Click {
+                            button: tray_icon::MouseButton::Left,
+                            button_state: tray_icon::MouseButtonState::Up,
+                            ..
+                        } = tray_event
+                        {
+                            // TODO: show app window if it's hidden
                         }
                     }
-                    Err(TryRecvError::Empty) => {}
-                    Err(TryRecvError::Disconnected) => {
+                    Err(_) => {
                         error!("System tray receiver disconnected.");
                         break;
                     }
@@ -68,9 +64,13 @@ pub fn set_tray_title(new_title: &str) {
 }
 
 pub fn init_tray() {
-    let tray_menu = Menu::new();
+    // TODO: Implement tray menus
+    // Currently, the main thread will panic, stating that MudaMenuItem class already exists or something,
+    // probably because of tray_icon, dioxus, and dioxus-desktop using different version of muda.
+    // Could use dioxus trayicon instead of tray_icon crate, and patch dioxus-desktop to use the same version of muda
+    // as dioxus
+
     let tray_icon = TrayIconBuilder::new()
-        .with_menu(Box::new(tray_menu))
         .with_tooltip("AuraTimer: Time Remaining")
         .with_title("[25:00]")
         .build()
