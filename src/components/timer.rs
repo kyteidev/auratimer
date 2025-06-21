@@ -25,11 +25,17 @@ pub fn clear_timer() {
 pub fn Timer() -> Element {
     let mut hovering = use_signal(|| false);
     let mut start_time = use_signal(|| None::<Instant>);
+    let mut last_seconds = use_signal(|| None::<u32>);
 
     let formatted_time = {
         let minutes = *MILLIS_REMAINING.read() / 1000 / 60;
         let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
-        set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
+
+        // Only update tray title if seconds actually changed for performance
+        if last_seconds.read().map_or(true, |last| last != seconds) {
+            set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
+            last_seconds.set(Some(seconds));
+        }
 
         format!("{:02}:{:02}", minutes, seconds)
     };
