@@ -32,7 +32,7 @@ pub fn Timer() -> Element {
         let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
 
         // Only update tray title if seconds actually changed for performance
-        if last_seconds.read().map_or(true, |last| last != seconds) {
+        if last_seconds.peek().map_or(true, |last| last != seconds) {
             set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
             last_seconds.set(Some(seconds));
         }
