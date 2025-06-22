@@ -7,6 +7,7 @@ pub enum IconType {
     Start,
     Pause,
     Restart,
+    Skip,
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -39,6 +40,21 @@ pub fn Icon(props: Props) -> Element {
                 fill: "none"
             }
         ),
+        IconType::Skip => rsx!(
+            path {
+                d: "M0 0h24v24H0z",
+                fill: "none",
+                stroke: "none"
+            }
+            path {
+                d: "M4 5v14l12 -7z",
+                fill: "none",
+            }
+            path {
+                d: "M20 5l0 14",
+                fill: "none",
+            }
+        )
     };
 
     rsx!(

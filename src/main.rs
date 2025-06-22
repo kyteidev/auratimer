@@ -17,7 +17,7 @@ use tray_icon::TrayIconEvent;
 use crate::{
     components::{
         icons::IconType,
-        timer::{clear_timer, start_timer, Timer},
+        timer::{clear_timer, next_session, start_timer, Timer},
     },
     state::{IS_FOCUS_MODE, TIMER_EXPIRED},
     tray::{
@@ -116,6 +116,12 @@ fn App() -> Element {
                         title: "Restart timer",
                         size: "6rem",
                         action: clear_timer,
+                    }
+                    IconButton {
+                        icon_type: IconType::Skip,
+                        title: "Skip session",
+                        size: "6rem",
+                        action: next_session,
                     }
                 }
             }

@@ -40,6 +40,13 @@ pub fn start_timer() {
     *TIMER_RUNNING.write() = true;
 }
 
+pub fn next_session() {
+    let is_focus_mode = *IS_FOCUS_MODE.peek();
+    *IS_FOCUS_MODE.write() = !is_focus_mode;
+
+    clear_timer();
+}
+
 #[component]
 pub fn Timer() -> Element {
     let mut hovering = use_signal(|| false);
