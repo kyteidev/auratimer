@@ -9,7 +9,7 @@ use crate::{
 #[component]
 pub fn TimerExpired() -> Element {
     let is_focus_mode = *IS_FOCUS_MODE.read();
-    let small_session_count = *SMALL_SESSION_COUNT.peek();
+    let small_session_count = *SMALL_SESSION_COUNT.read();
 
     rsx! {
         div {
