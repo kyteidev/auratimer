@@ -17,14 +17,14 @@ use tray_icon::TrayIconEvent;
 use crate::{
     components::{
         icons::IconType,
-        timer::{clear_timer, Timer},
+        timer::{clear_timer, start_timer, Timer},
     },
     state::{IS_FOCUS_MODE, TIMER_EXPIRED},
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
     },
-    ui::icon_button::IconButton,
+    ui::{button::Button, icon_button::IconButton},
     window::{set_transparent_titlebar, WindowDragArea},
 };
 
@@ -99,17 +99,52 @@ fn App() -> Element {
         div {
             class: format!("w-screen h-screen select-none flex flex-col {} {}", bg_color, text_color),
             WindowDragArea {}
-            div {
-                class: "flex-grow flex items-center justify-center",
-                Timer {}
+            if *TIMER_EXPIRED.read() {
+                div {
+                    class: "flex-grow flex items-center justify-center",
+                    TimerExpired {}
+                }
+            } else {
+                div {
+                    class: "flex-grow flex items-center justify-center",
+                    Timer {}
+                }
+                div {
+                    class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
+                    IconButton {
+                        icon_type: IconType::Restart,
+                        title: "Restart timer",
+                        size: "6rem",
+                        action: clear_timer,
+                    }
+                }
             }
-            div {
-                class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
-                IconButton {
-                    icon_type: IconType::Restart,
-                    title: "Restart timer",
-                    size: "6rem",
-                    action: clear_timer,
+        }
+    }
+}
+
+#[component]
+fn TimerExpired() -> Element {
+    let is_focus_mode = *IS_FOCUS_MODE.read();
+
+    rsx! {
+        div {
+            class: "text-6xl font-bold flex flex-col items-center justify-center space-y-8",
+            h1 {
+                if is_focus_mode {
+                    "It's time to focus!"
+                } else {
+                    "It's time for your break!"
+                }
+            }
+            Button {
+                title: "Start timer",
+                action: start_timer,
+                class: "w-32 h-12 text-xl text-red-200",
+                text: if is_focus_mode {
+                    "Start focus"
+                } else {
+                    "Start break"
                 }
             }
         }

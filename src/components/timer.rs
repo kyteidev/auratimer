@@ -16,6 +16,8 @@ const BREAK_DURATION: u32 = 5 * 60 * 1000;
 static TIMER_RUNNING: GlobalSignal<bool> = GlobalSignal::new(|| false);
 static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| FOCUS_DURATION);
 
+static START_TIME: GlobalSignal<Option<Instant>> = GlobalSignal::new(|| None);
+
 pub fn clear_timer() {
     *TIMER_RUNNING.write() = false;
     *MILLIS_REMAINING.write() = if *IS_FOCUS_MODE.read() {
@@ -26,19 +28,22 @@ pub fn clear_timer() {
     *TIMER_EXPIRED.write() = false;
 }
 
+pub fn start_timer() {
+    *MILLIS_REMAINING.write() = if *IS_FOCUS_MODE.read() {
+        FOCUS_DURATION
+    } else {
+        BREAK_DURATION
+    };
+    *TIMER_EXPIRED.write() = false;
+
+    *START_TIME.write() = Some(Instant::now());
+    *TIMER_RUNNING.write() = true;
+}
+
 #[component]
 pub fn Timer() -> Element {
     let mut hovering = use_signal(|| false);
-    let mut start_time = use_signal(|| None::<Instant>);
     let mut last_seconds = use_signal(|| None::<u32>);
-
-    let timer_duration = use_signal(|| {
-        if *IS_FOCUS_MODE.read() {
-            FOCUS_DURATION
-        } else {
-            BREAK_DURATION
-        }
-    });
 
     let mut formatted_time = use_signal(String::new);
 
@@ -59,11 +64,7 @@ pub fn Timer() -> Element {
 
     let toggle_timer = move |_| {
         if !*TIMER_RUNNING.read() {
-            if *MILLIS_REMAINING.read() == 0 {
-                *MILLIS_REMAINING.write() = *timer_duration.read();
-                *TIMER_EXPIRED.write() = false;
-            }
-            start_time.set(Some(Instant::now()));
+            *START_TIME.write() = Some(Instant::now());
             *TIMER_RUNNING.write() = true;
         } else {
             *TIMER_RUNNING.write() = false;
@@ -72,7 +73,7 @@ pub fn Timer() -> Element {
 
     use_effect(move || {
         if *TIMER_RUNNING.read() {
-            if let Some(timer_start) = *start_time.peek() {
+            if let Some(timer_start) = *START_TIME.peek() {
                 spawn(async move {
                     let interval = Duration::from_millis(100); // update timer every 100ms for accuracy
                     let mut interval = tokio::time::interval(interval);
