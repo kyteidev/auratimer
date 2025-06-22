@@ -19,7 +19,7 @@ use crate::{
         icons::IconType,
         timer::{clear_timer, next_session, revert_session, start_timer, Timer, SKIPPED_SESSION},
     },
-    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
+    state::{IS_FOCUS_MODE, SMALL_SESSION_COUNT, TIMER_EXPIRED},
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
@@ -150,6 +150,7 @@ fn App() -> Element {
 #[component]
 fn TimerExpired() -> Element {
     let is_focus_mode = *IS_FOCUS_MODE.read();
+    let small_session_count = *SMALL_SESSION_COUNT.peek();
 
     rsx! {
         div {
@@ -158,7 +159,11 @@ fn TimerExpired() -> Element {
                 if is_focus_mode {
                     "It's time to focus!"
                 } else {
-                    "It's time for your break!"
+                    if small_session_count % 4 == 0 && small_session_count != 0 {
+                        "It's time for your long break!"
+                    } else {
+                        "It's time for your short break!"
+                    }
                 }
             }
             Button {

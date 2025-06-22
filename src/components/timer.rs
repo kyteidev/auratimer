@@ -6,12 +6,13 @@ use tokio::time::Instant;
 use crate::{
     components::icons::{Icon, IconType},
     sound::play_alarm,
-    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
+    state::{FULL_SESSION_COUNT, IS_FOCUS_MODE, SMALL_SESSION_COUNT, TIMER_EXPIRED},
     tray::set_tray_title,
 };
 
 const FOCUS_DURATION: u32 = 25 * 60 * 1000;
-const BREAK_DURATION: u32 = 5 * 60 * 1000;
+const SHORT_BREAK_DURATION: u32 = 5 * 60 * 1000;
+const LONG_BREAK_DURATION: u32 = 20 * 60 * 1000;
 
 static TIMER_RUNNING: GlobalSignal<bool> = GlobalSignal::new(|| false);
 static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| FOCUS_DURATION);
@@ -22,11 +23,15 @@ pub static SKIPPED_SESSION: GlobalSignal<bool> = GlobalSignal::new(|| false);
 static START_TIME: GlobalSignal<Option<Instant>> = GlobalSignal::new(|| None);
 
 pub fn clear_timer() {
+    let small_session_count = *SMALL_SESSION_COUNT.peek();
+
     *TIMER_RUNNING.write() = false;
-    *MILLIS_REMAINING.write() = if *IS_FOCUS_MODE.read() {
+    *MILLIS_REMAINING.write() = if *IS_FOCUS_MODE.peek() {
         FOCUS_DURATION
+    } else if small_session_count % 4 == 0 && small_session_count != 0 {
+        LONG_BREAK_DURATION
     } else {
-        BREAK_DURATION
+        SHORT_BREAK_DURATION
     };
     *TIMER_EXPIRED.write() = false;
 }
@@ -45,11 +50,25 @@ pub fn next_session() {
     *LAST_SAVED_TIME.write() = *MILLIS_REMAINING.read();
     *SKIPPED_SESSION.write() = true;
 
+    let small_session_count = *SMALL_SESSION_COUNT.peek();
+    // used remainder for session stats
+    if small_session_count % 4 == 0 && small_session_count != 0 {
+        *FULL_SESSION_COUNT.write() += 1;
+    }
+    if is_focus_mode {
+        *SMALL_SESSION_COUNT.write() += 1;
+    }
+
     clear_timer();
 }
 
 pub fn revert_session() {
     let is_focus_mode = *IS_FOCUS_MODE.peek();
+
+    if !is_focus_mode {
+        *SMALL_SESSION_COUNT.write() -= 1;
+    }
+
     *IS_FOCUS_MODE.write() = !is_focus_mode;
 
     *TIMER_RUNNING.write() = false;
@@ -116,6 +135,17 @@ pub fn Timer() -> Element {
                                 *TIMER_RUNNING.write() = false;
 
                                 let is_focus_mode = *IS_FOCUS_MODE.peek();
+
+                                let small_session_count = *SMALL_SESSION_COUNT.peek();
+                                // used remainder for session stats
+                                if small_session_count % 4 == 0 && small_session_count != 0 {
+                                    *FULL_SESSION_COUNT.write() += 1;
+                                }
+
+                                if is_focus_mode {
+                                    *SMALL_SESSION_COUNT.write() += 1;
+                                }
+
                                 *IS_FOCUS_MODE.write() = !is_focus_mode;
 
                                 play_alarm();
