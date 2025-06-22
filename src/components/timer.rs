@@ -32,7 +32,7 @@ pub fn Timer() -> Element {
     let mut start_time = use_signal(|| None::<Instant>);
     let mut last_seconds = use_signal(|| None::<u32>);
 
-    let timer_amount = use_signal(|| {
+    let timer_duration = use_signal(|| {
         if *IS_FOCUS_MODE.read() {
             FOCUS_DURATION
         } else {
@@ -60,7 +60,7 @@ pub fn Timer() -> Element {
     let toggle_timer = move |_| {
         if !*TIMER_RUNNING.read() {
             if *MILLIS_REMAINING.read() == 0 {
-                *MILLIS_REMAINING.write() = *timer_amount.read();
+                *MILLIS_REMAINING.write() = *timer_duration.read();
                 *TIMER_EXPIRED.write() = false;
             }
             start_time.set(Some(Instant::now()));
