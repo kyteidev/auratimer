@@ -154,7 +154,7 @@ fn TimerExpired() -> Element {
 
     rsx! {
         div {
-            class: "text-6xl font-bold flex flex-col items-center justify-center space-y-8",
+            class: "text-6xl font-bold flex flex-col items-center justify-center text-center space-y-8",
             h1 {
                 if is_focus_mode {
                     "It's time to focus!"
