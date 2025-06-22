@@ -106,6 +106,12 @@ fn App() -> Element {
         clear_timer
     };
 
+    let left_button_title = if *SKIPPED_SESSION.read() {
+        "Revert session"
+    } else {
+        "Restart timer"
+    };
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
@@ -125,7 +131,7 @@ fn App() -> Element {
                     class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
                     IconButton {
                         icon_type: left_button_icon,
-                        title: "Restart timer",
+                        title: left_button_title,
                         size: "6rem",
                         action: left_button_action,
                     }
