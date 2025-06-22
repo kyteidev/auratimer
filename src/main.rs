@@ -15,7 +15,9 @@ use tracing_subscriber::FmtSubscriber;
 use tray_icon::TrayIconEvent;
 
 use crate::{
-    components::{control_buttons::ControlButtons, timer::Timer, timer_expired::TimerExpired},
+    components::{
+        control_buttons::ControlButtons, info::Info, timer::Timer, timer_expired::TimerExpired,
+    },
     state::{IS_FOCUS_MODE, TIMER_EXPIRED},
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
@@ -107,7 +109,11 @@ fn App() -> Element {
             } else {
                 div {
                     class: "flex-grow flex items-center justify-center",
-                    Timer {}
+                    div {
+                        class: "relative flex items-center justify-center w-full",
+                        Info {}
+                        Timer {}
+                    }
                 }
                 ControlButtons {}
             }
