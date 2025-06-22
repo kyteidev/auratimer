@@ -4,10 +4,10 @@ use dioxus::prelude::*;
 use tokio::time::Instant;
 
 use crate::{
-    components::icons::{Icon, IconType},
     sound::play_alarm,
     state::{FULL_SESSION_COUNT, IS_FOCUS_MODE, SMALL_SESSION_COUNT, TIMER_EXPIRED},
     tray::set_tray_title,
+    ui::icons::{Icon, IconType},
 };
 
 const FOCUS_DURATION: u32 = 25 * 60 * 1000;

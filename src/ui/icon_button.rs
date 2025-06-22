@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::icons::{Icon, IconType},
     state::{IS_FOCUS_MODE, TIMER_EXPIRED},
+    ui::icons::{Icon, IconType},
 };
 
 #[derive(Props, Clone, PartialEq)]

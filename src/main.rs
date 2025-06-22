@@ -15,16 +15,15 @@ use tracing_subscriber::FmtSubscriber;
 use tray_icon::TrayIconEvent;
 
 use crate::{
-    components::{
-        icons::IconType,
-        timer::{clear_timer, next_session, revert_session, start_timer, Timer, SKIPPED_SESSION},
+    components::timer::{
+        clear_timer, next_session, revert_session, start_timer, Timer, SKIPPED_SESSION,
     },
     state::{IS_FOCUS_MODE, SMALL_SESSION_COUNT, TIMER_EXPIRED},
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
     },
-    ui::{button::Button, icon_button::IconButton},
+    ui::{button::Button, icon_button::IconButton, icons::IconType},
     window::{set_transparent_titlebar, WindowDragArea},
 };
 
