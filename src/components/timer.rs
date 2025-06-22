@@ -27,18 +27,23 @@ pub fn Timer() -> Element {
     let mut start_time = use_signal(|| None::<Instant>);
     let mut last_seconds = use_signal(|| None::<u32>);
 
-    let formatted_time = {
-        let minutes = *MILLIS_REMAINING.read() / 1000 / 60;
-        let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
+    let mut formatted_time = use_signal(String::new);
 
-        // Only update tray title if seconds actually changed for performance
-        if last_seconds.peek().map_or(true, |last| last != seconds) {
-            set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
-            last_seconds.set(Some(seconds));
-        }
+    use_effect(move || {
+        formatted_time.set({
+            let minutes = *MILLIS_REMAINING.read() / 1000 / 60;
+            let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
 
-        format!("{:02}:{:02}", minutes, seconds)
-    };
+            // Only update tray title if seconds actually changed for performance
+            if last_seconds.peek().map_or(true, |last| last != seconds) {
+                set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
+                last_seconds.set(Some(seconds));
+            }
+
+            format!("{:02}:{:02}", minutes, seconds)
+        });
+    });
+
     let toggle_timer = move |_| {
         if !*TIMER_RUNNING.read() {
             if *MILLIS_REMAINING.read() == 0 {
