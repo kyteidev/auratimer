@@ -29,12 +29,7 @@ pub fn clear_timer() {
 }
 
 pub fn start_timer() {
-    *MILLIS_REMAINING.write() = if *IS_FOCUS_MODE.read() {
-        FOCUS_DURATION
-    } else {
-        BREAK_DURATION
-    };
-    *TIMER_EXPIRED.write() = false;
+    clear_timer();
 
     *START_TIME.write() = Some(Instant::now());
     *TIMER_RUNNING.write() = true;
