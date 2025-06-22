@@ -38,7 +38,11 @@ fn main() {
     FmtSubscriber::builder().init();
 
     let config = Config::new()
-        .with_window(WindowBuilder::new().with_inner_size(LogicalSize::new(900.0, 600.0)))
+        .with_window(
+            WindowBuilder::new()
+                .with_inner_size(LogicalSize::new(900.0, 600.0))
+                .with_min_inner_size(LogicalSize::new(400.0, 300.0)),
+        )
         .with_close_behaviour(WindowCloseBehaviour::LastWindowHides);
 
     dioxus::LaunchBuilder::desktop()
