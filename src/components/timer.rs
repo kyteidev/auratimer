@@ -13,20 +13,16 @@ use crate::{
 const FOCUS_DURATION: u32 = 25 * 60 * 1000;
 const BREAK_DURATION: u32 = 5 * 60 * 1000;
 
-static TIMER_AMOUNT: GlobalSignal<u32> = GlobalSignal::new(|| {
-    if *IS_FOCUS_MODE.read() {
-        FOCUS_DURATION
-    } else {
-        BREAK_DURATION
-    }
-});
-
 static TIMER_RUNNING: GlobalSignal<bool> = GlobalSignal::new(|| false);
-static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| *TIMER_AMOUNT.read());
+static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| FOCUS_DURATION);
 
 pub fn clear_timer() {
     *TIMER_RUNNING.write() = false;
-    *MILLIS_REMAINING.write() = *TIMER_AMOUNT.read();
+    *MILLIS_REMAINING.write() = if *IS_FOCUS_MODE.read() {
+        FOCUS_DURATION
+    } else {
+        BREAK_DURATION
+    };
     *TIMER_EXPIRED.write() = false;
 }
 
@@ -35,6 +31,14 @@ pub fn Timer() -> Element {
     let mut hovering = use_signal(|| false);
     let mut start_time = use_signal(|| None::<Instant>);
     let mut last_seconds = use_signal(|| None::<u32>);
+
+    let timer_amount = use_signal(|| {
+        if *IS_FOCUS_MODE.read() {
+            FOCUS_DURATION
+        } else {
+            BREAK_DURATION
+        }
+    });
 
     let mut formatted_time = use_signal(String::new);
 
@@ -56,7 +60,7 @@ pub fn Timer() -> Element {
     let toggle_timer = move |_| {
         if !*TIMER_RUNNING.read() {
             if *MILLIS_REMAINING.read() == 0 {
-                *MILLIS_REMAINING.write() = *TIMER_AMOUNT.read();
+                *MILLIS_REMAINING.write() = *timer_amount.read();
                 *TIMER_EXPIRED.write() = false;
             }
             start_time.set(Some(Instant::now()));
