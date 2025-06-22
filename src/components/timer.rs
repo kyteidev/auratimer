@@ -7,7 +7,7 @@ use crate::{
     components::icons::{Icon, IconType},
     sound::play_alarm,
     state::{IS_FOCUS_MODE, TIMER_EXPIRED},
-    tray::tray::set_tray_title,
+    tray::set_tray_title,
 };
 
 const FOCUS_DURATION: u32 = 25 * 60 * 1000;
@@ -44,7 +44,7 @@ pub fn Timer() -> Element {
             let seconds = *MILLIS_REMAINING.read() / 1000 % 60;
 
             // Only update tray title if seconds actually changed for performance
-            if last_seconds.peek().map_or(true, |last| last != seconds) {
+            if *last_seconds.peek() != Some(seconds) {
                 set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
                 last_seconds.set(Some(seconds));
             }
@@ -107,12 +107,10 @@ pub fn Timer() -> Element {
 
     let color = if *TIMER_EXPIRED.read() {
         "hover:bg-red-500"
+    } else if *IS_FOCUS_MODE.read() {
+        "hover:bg-blue-500"
     } else {
-        if *IS_FOCUS_MODE.read() {
-            "hover:bg-blue-500"
-        } else {
-            "hover:bg-green-500"
-        }
+        "hover:bg-green-500"
     };
 
     rsx! {

@@ -21,7 +21,7 @@ pub static WINDOW_COMMAND_SENDER: Mutex<Option<Sender<WindowCommand>>> = Mutex::
 pub static WINDOW_COMMAND_RECEIVER: Mutex<Option<Receiver<WindowCommand>>> = Mutex::new(None);
 
 thread_local! {
-    static TRAY_ICON: Mutex<Option<tray_icon::TrayIcon>> = Mutex::new(None);
+    static TRAY_ICON: Mutex<Option<tray_icon::TrayIcon>> = const { Mutex::new(None) };
 }
 
 pub fn init_tray_handler() {
@@ -79,7 +79,7 @@ extern "C" {
 pub fn set_tray_title(new_title: &str) {
     TRAY_ICON.with(|tray| {
         if let Some(tray_icon) = tray.lock().unwrap().as_mut() {
-            let _ = tray_icon.set_title(Some(new_title.to_string()));
+            tray_icon.set_title(Some(new_title.to_string()));
         }
     });
 }

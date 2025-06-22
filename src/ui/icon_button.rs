@@ -25,22 +25,18 @@ pub fn IconButton(props: Props) -> Element {
 
     let color = if *TIMER_EXPIRED.read() {
         "fill-red-500 stroke-red-500"
+    } else if *IS_FOCUS_MODE.read() {
+        "fill-blue-500 stroke-blue-500"
     } else {
-        if *IS_FOCUS_MODE.read() {
-            "fill-blue-500 stroke-blue-500"
-        } else {
-            "fill-green-500 stroke-green-500"
-        }
+        "fill-green-500 stroke-green-500"
     };
 
     let bg_color = if *TIMER_EXPIRED.read() {
         "bg-red-500"
+    } else if *IS_FOCUS_MODE.read() {
+        "bg-blue-500"
     } else {
-        if *IS_FOCUS_MODE.read() {
-            "bg-blue-500"
-        } else {
-            "bg-green-500"
-        }
+        "bg-green-500"
     };
 
     rsx! {
