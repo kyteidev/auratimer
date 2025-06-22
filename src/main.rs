@@ -15,15 +15,12 @@ use tracing_subscriber::FmtSubscriber;
 use tray_icon::TrayIconEvent;
 
 use crate::{
-    components::timer::{
-        clear_timer, next_session, revert_session, start_timer, Timer, SKIPPED_SESSION,
-    },
-    state::{IS_FOCUS_MODE, SMALL_SESSION_COUNT, TIMER_EXPIRED},
+    components::{control_buttons::ControlButtons, timer::Timer, timer_expired::TimerExpired},
+    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
     },
-    ui::{button::Button, icon_button::IconButton, icons::IconType},
     window::{set_transparent_titlebar, WindowDragArea},
 };
 
@@ -97,24 +94,6 @@ fn App() -> Element {
         "text-green-500 fill-green-500"
     };
 
-    let left_button_icon = if *SKIPPED_SESSION.read() {
-        IconType::Revert
-    } else {
-        IconType::Restart
-    };
-
-    let left_button_action = if *SKIPPED_SESSION.read() {
-        revert_session
-    } else {
-        clear_timer
-    };
-
-    let left_button_title = if *SKIPPED_SESSION.read() {
-        "Revert session"
-    } else {
-        "Restart timer"
-    };
-
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
@@ -130,54 +109,7 @@ fn App() -> Element {
                     class: "flex-grow flex items-center justify-center",
                     Timer {}
                 }
-                div {
-                    class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
-                    IconButton {
-                        icon_type: left_button_icon,
-                        title: left_button_title,
-                        size: "6rem",
-                        action: left_button_action,
-                    }
-                    IconButton {
-                        icon_type: IconType::Skip,
-                        title: "Skip session",
-                        size: "6rem",
-                        action: next_session,
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn TimerExpired() -> Element {
-    let is_focus_mode = *IS_FOCUS_MODE.read();
-    let small_session_count = *SMALL_SESSION_COUNT.peek();
-
-    rsx! {
-        div {
-            class: "text-6xl font-bold flex flex-col items-center justify-center text-center space-y-8",
-            h1 {
-                if is_focus_mode {
-                    "It's time to focus!"
-                } else {
-                    if small_session_count % 4 == 0 && small_session_count != 0 {
-                        "It's time for your long break!"
-                    } else {
-                        "It's time for your short break!"
-                    }
-                }
-            }
-            Button {
-                title: "Start timer",
-                action: start_timer,
-                class: "w-32 h-12 text-xl text-red-200",
-                text: if is_focus_mode {
-                    "Start focus"
-                } else {
-                    "Start break"
-                }
+                ControlButtons {}
             }
         }
     }
