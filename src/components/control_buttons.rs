@@ -20,7 +20,7 @@ pub fn ControlButtons() -> Element {
     };
 
     let left_button_title = if *SKIPPED_SESSION.read() {
-        "Revert session"
+        "Restore previous session"
     } else {
         "Restart timer"
     };
