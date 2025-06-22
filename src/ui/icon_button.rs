@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::icons::{Icon, IconType},
-    state::TIMER_EXPIRED,
+    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
 };
 
 #[derive(Props, Clone, PartialEq)]
@@ -23,7 +23,25 @@ pub fn IconButton(props: Props) -> Element {
 
     let size = props.size.clone();
 
-    let timer_expired = *TIMER_EXPIRED.read();
+    let color = if *TIMER_EXPIRED.read() {
+        "fill-red-500 stroke-red-500"
+    } else {
+        if *IS_FOCUS_MODE.read() {
+            "fill-blue-500 stroke-blue-500"
+        } else {
+            "fill-green-500 stroke-green-500"
+        }
+    };
+
+    let bg_color = if *TIMER_EXPIRED.read() {
+        "bg-red-500"
+    } else {
+        if *IS_FOCUS_MODE.read() {
+            "bg-blue-500"
+        } else {
+            "bg-green-500"
+        }
+    };
 
     rsx! {
         div {
@@ -31,7 +49,7 @@ pub fn IconButton(props: Props) -> Element {
             width: size.clone(),
             height: size.clone(),
             button {
-                class: format!("transition duration-200 rounded-full opacity-0 hover:opacity-10 z-10 cursor-default hover:cursor-pointer {}", if timer_expired { "bg-red-500" } else { "bg-blue-500" }),
+                class: format!("transition duration-200 rounded-full opacity-0 hover:opacity-10 z-10 cursor-default hover:cursor-pointer {}", bg_color),
                 title: props.title,
                 width: size.clone(),
                 height: size,
@@ -39,7 +57,7 @@ pub fn IconButton(props: Props) -> Element {
             }
             Icon {
                 icon_type: props.icon_type,
-                class: format!("transition duration-200 absolute {}", if timer_expired { "fill-red-500 stroke-red-500" } else { "fill-blue-500 stroke-blue-500" }),
+                class: format!("transition duration-200 absolute {}", color),
                 opacity: 1.0,
                 size: format!("{}rem", icon_size),
             }

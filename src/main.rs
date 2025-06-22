@@ -19,7 +19,7 @@ use crate::{
         icons::IconType,
         timer::{clear_timer, Timer},
     },
-    state::TIMER_EXPIRED,
+    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
     tray::tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
@@ -78,12 +78,30 @@ fn App() -> Element {
         }
     });
 
-    let timer_expired = *TIMER_EXPIRED.read();
+    let bg_color = if *TIMER_EXPIRED.read() {
+        "bg-red-200"
+    } else {
+        if *IS_FOCUS_MODE.read() {
+            "bg-blue-200"
+        } else {
+            "bg-green-200"
+        }
+    };
+
+    let text_color = if *TIMER_EXPIRED.read() {
+        "text-red-500 fill-red-500"
+    } else {
+        if *IS_FOCUS_MODE.read() {
+            "text-blue-500 fill-blue-500"
+        } else {
+            "text-green-500 fill-green-500"
+        }
+    };
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
-            class: format!("w-screen h-screen select-none flex flex-col {}", if timer_expired { "bg-red-200 text-red-500" } else { "bg-blue-200 text-blue-500" }),
+            class: format!("w-screen h-screen select-none flex flex-col {} {}", bg_color, text_color),
             WindowDragArea {}
             div {
                 class: "flex-grow flex items-center justify-center",
