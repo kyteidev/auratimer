@@ -17,7 +17,7 @@ use tray_icon::TrayIconEvent;
 use crate::{
     components::{
         icons::IconType,
-        timer::{clear_timer, next_session, start_timer, Timer},
+        timer::{clear_timer, next_session, revert_session, start_timer, Timer, SKIPPED_SESSION},
     },
     state::{IS_FOCUS_MODE, TIMER_EXPIRED},
     tray::{
@@ -94,6 +94,18 @@ fn App() -> Element {
         "text-green-500 fill-green-500"
     };
 
+    let left_button_icon = if *SKIPPED_SESSION.read() {
+        IconType::Revert
+    } else {
+        IconType::Restart
+    };
+
+    let left_button_action = if *SKIPPED_SESSION.read() {
+        revert_session
+    } else {
+        clear_timer
+    };
+
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
         div {
@@ -112,10 +124,10 @@ fn App() -> Element {
                 div {
                     class: "absolute bottom-0 left-0 flex items-end justify-center w-full h-1/5 py-4",
                     IconButton {
-                        icon_type: IconType::Restart,
+                        icon_type: left_button_icon,
                         title: "Restart timer",
                         size: "6rem",
-                        action: clear_timer,
+                        action: left_button_action,
                     }
                     IconButton {
                         icon_type: IconType::Skip,

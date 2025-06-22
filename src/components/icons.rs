@@ -8,6 +8,7 @@ pub enum IconType {
     Pause,
     Restart,
     Skip,
+    Revert,
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -52,6 +53,21 @@ pub fn Icon(props: Props) -> Element {
             }
             path {
                 d: "M20 5l0 14",
+                fill: "none",
+            }
+        ),
+        IconType::Revert => rsx!(
+            path {
+                d: "M0 0h24v24H0z",
+                fill: "none",
+                stroke: "none"
+            }
+            path {
+                d: "M9 14l-4 -4l4 -4",
+                fill: "none",
+            }
+            path {
+                d: "M5 10h11a4 4 0 1 1 0 8h-1",
                 fill: "none",
             }
         )

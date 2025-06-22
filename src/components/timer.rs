@@ -16,6 +16,9 @@ const BREAK_DURATION: u32 = 5 * 60 * 1000;
 static TIMER_RUNNING: GlobalSignal<bool> = GlobalSignal::new(|| false);
 static MILLIS_REMAINING: GlobalSignal<u32> = GlobalSignal::new(|| FOCUS_DURATION);
 
+static LAST_SAVED_TIME: GlobalSignal<u32> = GlobalSignal::new(|| 0);
+pub static SKIPPED_SESSION: GlobalSignal<bool> = GlobalSignal::new(|| false);
+
 static START_TIME: GlobalSignal<Option<Instant>> = GlobalSignal::new(|| None);
 
 pub fn clear_timer() {
@@ -39,7 +42,20 @@ pub fn next_session() {
     let is_focus_mode = *IS_FOCUS_MODE.peek();
     *IS_FOCUS_MODE.write() = !is_focus_mode;
 
+    *LAST_SAVED_TIME.write() = *MILLIS_REMAINING.read();
+    *SKIPPED_SESSION.write() = true;
+
     clear_timer();
+}
+
+pub fn revert_session() {
+    let is_focus_mode = *IS_FOCUS_MODE.peek();
+    *IS_FOCUS_MODE.write() = !is_focus_mode;
+
+    *TIMER_RUNNING.write() = false;
+    *MILLIS_REMAINING.write() = *LAST_SAVED_TIME.peek();
+
+    *SKIPPED_SESSION.write() = false;
 }
 
 #[component]
@@ -68,6 +84,8 @@ pub fn Timer() -> Element {
         if !*TIMER_RUNNING.read() {
             *START_TIME.write() = Some(Instant::now());
             *TIMER_RUNNING.write() = true;
+
+            *SKIPPED_SESSION.write() = false;
         } else {
             *TIMER_RUNNING.write() = false;
         }
