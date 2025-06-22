@@ -93,7 +93,7 @@ pub fn init_tray() {
 
     let tray_icon = TrayIconBuilder::new()
         .with_tooltip("AuraTimer: Time Remaining")
-        .with_title("[25:00]")
+        .with_title("Focus: 25:00")
         .build()
         .unwrap();
 

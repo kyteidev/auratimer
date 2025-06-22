@@ -60,6 +60,10 @@ pub fn next_session() {
     }
 
     clear_timer();
+
+    let minutes = *MILLIS_REMAINING.peek() / 1000 / 60;
+    let seconds = *MILLIS_REMAINING.peek() / 1000 % 60;
+    update_tray(minutes, seconds);
 }
 
 pub fn revert_session() {
@@ -75,6 +79,10 @@ pub fn revert_session() {
     *MILLIS_REMAINING.write() = *LAST_SAVED_TIME.peek();
 
     *SKIPPED_SESSION.write() = false;
+
+    let minutes = *MILLIS_REMAINING.peek() / 1000 / 60;
+    let seconds = *MILLIS_REMAINING.peek() / 1000 % 60;
+    update_tray(minutes, seconds);
 }
 
 #[component]
@@ -91,7 +99,7 @@ pub fn Timer() -> Element {
 
             // Only update tray title if seconds actually changed for performance
             if *last_seconds.peek() != Some(seconds) {
-                set_tray_title(format!("[{:02}:{:02}]", minutes, seconds).as_str());
+                update_tray(minutes, seconds);
                 last_seconds.set(Some(seconds));
             }
 
@@ -191,4 +199,13 @@ pub fn Timer() -> Element {
             }
         }
     }
+}
+
+fn update_tray(minutes: u32, seconds: u32) {
+    let session_type = if *IS_FOCUS_MODE.read() {
+        "Focus"
+    } else {
+        "Break"
+    };
+    set_tray_title(format!("{}: {:02}:{:02}", session_type, minutes, seconds).as_str());
 }
