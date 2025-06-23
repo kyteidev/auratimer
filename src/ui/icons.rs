@@ -9,6 +9,8 @@ pub enum IconType {
     Restart,
     Skip,
     Revert,
+    CircleFilled,
+    CircleOutlined,
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -70,7 +72,28 @@ pub fn Icon(props: Props) -> Element {
                 d: "M5 10h11a4 4 0 1 1 0 8h-1",
                 fill: "none",
             }
-        )
+        ),
+        IconType::CircleFilled => rsx!(
+            path {
+                d: "M0 0h24v24H0z",
+                fill: "none",
+                stroke: "none"
+            }
+            path {
+                d: "M7 3.34a10 10 0 1 1 -4.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 4.995 -8.336z"
+            }
+        ),
+        IconType::CircleOutlined => rsx!(
+            path {
+                d: "M0 0h24v24H0z",
+                fill: "none",
+                stroke: "none"
+            }
+            path {
+                d: "M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0",
+                fill: "none",
+            }
+        ),
     };
 
     rsx!(

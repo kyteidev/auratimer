@@ -55,7 +55,7 @@ pub fn next_session() {
     if small_session_count % 4 == 0 && small_session_count != 0 {
         *FULL_SESSION_COUNT.write() += 1;
     }
-    if is_focus_mode {
+    if !is_focus_mode {
         *SMALL_SESSION_COUNT.write() += 1;
     }
 
@@ -150,7 +150,7 @@ pub fn Timer() -> Element {
                                     *FULL_SESSION_COUNT.write() += 1;
                                 }
 
-                                if is_focus_mode {
+                                if !is_focus_mode {
                                     *SMALL_SESSION_COUNT.write() += 1;
                                 }
 
@@ -178,7 +178,8 @@ pub fn Timer() -> Element {
 
     rsx! {
         div {
-            class: "relative bg-transparent w-3/5 h-2/5 rounded-lg text-[10rem] flex items-center justify-center",
+            class: "relative bg-transparent w-4/7 rounded-lg text-[10rem] flex items-center justify-center",
+            style: "height: calc(100vh * 0.33",
             div {
                 class: format!("transition duration-200 absolute top-0 left-0 w-full h-full opacity-10 rounded-lg bg-transparent z-10 cursor-pointer flex items-center justify-center {}", color),
                 title: "Toggle timer",
