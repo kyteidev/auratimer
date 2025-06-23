@@ -186,7 +186,7 @@ pub fn Timer() -> Element {
             }
             Icon {
                 icon_type: if *TIMER_RUNNING.read() { IconType::Pause } else { IconType::Start },
-                class: format!("transition duration-200 absolute {}", icon_color),
+                class: format!("transition duration-200 absolute stroke-none {}", icon_color),
                 opacity: if *hovering.read() { 1.0 } else { 0.0 },
                 size: "96px",
             }
