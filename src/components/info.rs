@@ -67,7 +67,7 @@ fn SessionCount() -> Element {
             class: "flex space-x-2 items-center justify-center",
             if *hidden_items.read() > 0 {
                 div {
-                    class: format!("text-xs px-2 py-1 rounded-2xl {} {}", bg_color, text_color),
+                    class: format!("text-xs px-2 py-1 rounded-2xl text-center flex justify-center items-center {} {}", bg_color, text_color),
                     "+{hidden_items}"
                 }
             }
