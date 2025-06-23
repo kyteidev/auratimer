@@ -155,6 +155,10 @@ pub fn Timer() -> Element {
 
                                 if !is_focus_mode {
                                     *SMALL_SESSION_COUNT.write() += 1;
+
+                                    set_tray_title("Focus time!");
+                                } else {
+                                    set_tray_title("Break time!");
                                 }
 
                                 *IS_FOCUS_MODE.write() = !is_focus_mode;
