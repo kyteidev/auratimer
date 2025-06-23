@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::state::{IS_FOCUS_MODE, TIMER_EXPIRED};
+use crate::state::BG_COLOR_INVERTED;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct Props {
@@ -12,13 +12,7 @@ pub struct Props {
 
 #[component]
 pub fn Button(props: Props) -> Element {
-    let bg_color = if *TIMER_EXPIRED.read() {
-        "bg-red-500"
-    } else if *IS_FOCUS_MODE.read() {
-        "bg-blue-500"
-    } else {
-        "bg-green-500"
-    };
+    let bg_color = *BG_COLOR_INVERTED.read();
 
     rsx! {
         button {

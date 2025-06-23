@@ -5,7 +5,10 @@ use tokio::time::Instant;
 
 use crate::{
     sound::play_alarm,
-    state::{FULL_SESSION_COUNT, IS_FOCUS_MODE, SMALL_SESSION_COUNT, TIMER_EXPIRED},
+    state::{
+        BG_COLOR_HOVER, FULL_SESSION_COUNT, ICON_COLOR, IS_FOCUS_MODE, SMALL_SESSION_COUNT,
+        TIMER_EXPIRED,
+    },
     tray::set_tray_title,
     ui::icons::{Icon, IconType},
 };
@@ -167,14 +170,8 @@ pub fn Timer() -> Element {
     });
 
     let opacity = if *hovering.read() { 0.1 } else { 1.0 };
-
-    let color = if *TIMER_EXPIRED.read() {
-        "hover:bg-red-500"
-    } else if *IS_FOCUS_MODE.read() {
-        "hover:bg-blue-500"
-    } else {
-        "hover:bg-green-500"
-    };
+    let color = *BG_COLOR_HOVER.read();
+    let icon_color = *ICON_COLOR.read();
 
     rsx! {
         div {
@@ -189,7 +186,7 @@ pub fn Timer() -> Element {
             }
             Icon {
                 icon_type: if *TIMER_RUNNING.read() { IconType::Pause } else { IconType::Start },
-                class: format!("transition duration-200 absolute"),
+                class: format!("transition duration-200 absolute {}", icon_color),
                 opacity: if *hovering.read() { 1.0 } else { 0.0 },
                 size: "96px",
             }

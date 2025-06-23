@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
+    state::{BG_COLOR_INVERTED, ICON_COLOR},
     ui::icons::{Icon, IconType},
 };
 
@@ -23,21 +23,8 @@ pub fn IconButton(props: Props) -> Element {
 
     let size = props.size.clone();
 
-    let color = if *TIMER_EXPIRED.read() {
-        "fill-red-500 stroke-red-500"
-    } else if *IS_FOCUS_MODE.read() {
-        "fill-blue-500 stroke-blue-500"
-    } else {
-        "fill-green-500 stroke-green-500"
-    };
-
-    let bg_color = if *TIMER_EXPIRED.read() {
-        "bg-red-500"
-    } else if *IS_FOCUS_MODE.read() {
-        "bg-blue-500"
-    } else {
-        "bg-green-500"
-    };
+    let color = *ICON_COLOR.read();
+    let bg_color = *BG_COLOR_INVERTED.read();
 
     rsx! {
         div {

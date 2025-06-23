@@ -18,7 +18,7 @@ use crate::{
     components::{
         control_buttons::ControlButtons, info::Info, timer::Timer, timer_expired::TimerExpired,
     },
-    state::{IS_FOCUS_MODE, TIMER_EXPIRED},
+    state::{init_colors, BG_COLOR, TEXT_COLOR, TIMER_EXPIRED},
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
@@ -50,6 +50,8 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    init_colors();
+
     use_hook(|| {
         let (tx, rx) = channel::<TrayIconEvent>();
         *TRAY_EVENT_SENDER.lock().unwrap() = Some(tx);
@@ -80,21 +82,8 @@ fn App() -> Element {
         }
     });
 
-    let bg_color = if *TIMER_EXPIRED.read() {
-        "bg-red-200"
-    } else if *IS_FOCUS_MODE.read() {
-        "bg-blue-200"
-    } else {
-        "bg-green-200"
-    };
-
-    let text_color = if *TIMER_EXPIRED.read() {
-        "text-red-500 fill-red-500"
-    } else if *IS_FOCUS_MODE.read() {
-        "text-blue-500 fill-blue-500"
-    } else {
-        "text-green-500 fill-green-500"
-    };
+    let bg_color = *BG_COLOR.read();
+    let text_color = *TEXT_COLOR.read();
 
     rsx! {
         document::Link { rel: "stylesheet", href: asset!("/assets/tailwind.css") }
