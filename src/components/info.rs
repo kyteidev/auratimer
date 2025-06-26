@@ -7,14 +7,43 @@ use crate::{
     ui::icons::{Icon, IconType},
 };
 
+static VISIBLE_ITEMS: GlobalSignal<u32> = GlobalSignal::new(|| 0);
+static HIDDEN_ITEMS: GlobalSignal<u32> = GlobalSignal::new(|| 0);
+
 #[component]
 pub fn Info() -> Element {
     let is_focus_mode = *IS_FOCUS_MODE.read();
     let small_session_count = *SMALL_SESSION_COUNT.read();
 
+    fn update_visible_sessions(small_session_count: u32) {
+        let icon_width = 24; // 1.5rem
+        let spacing = 8; // 0.5rem
+        let icon_total = icon_width + spacing;
+
+        let scale_factor = window().scale_factor();
+        let window_width = window().outer_size().width / scale_factor as u32;
+
+        let max_width = 0.3 * window_width as f32;
+        let max_icons = (max_width / icon_total as f32).floor() as usize;
+
+        let visible_item_count = small_session_count.min(max_icons as u32);
+        *VISIBLE_ITEMS.write() = visible_item_count;
+
+        let hidden_count = small_session_count.saturating_sub(visible_item_count);
+        *HIDDEN_ITEMS.write() = hidden_count;
+    }
+
+    use_effect(move || {
+        let small_session_count = *SMALL_SESSION_COUNT.read();
+        update_visible_sessions(small_session_count);
+    });
+
     rsx! {
         div {
             class: "absolute top-[-5rem] left-0 w-full h-16 text-2xl font-bold space-y-2 flex flex-col items-center justify-center text-center",
+            onresize: move |_| {
+                update_visible_sessions(small_session_count);
+            },
             h1 {
                 if is_focus_mode {
                     "Focus"
@@ -33,31 +62,6 @@ pub fn Info() -> Element {
 
 #[component]
 fn SessionCount() -> Element {
-    let mut small_session_count = use_signal(|| 0);
-    let mut visible_items = use_signal(|| 0);
-    let mut hidden_items = use_signal(|| 0);
-
-    use_effect(move || {
-        let session_count = *SMALL_SESSION_COUNT.read();
-        small_session_count.set(session_count);
-
-        let icon_width = 24; // 1.5rem
-        let spacing = 8; // 0.5rem
-        let icon_total = icon_width + spacing;
-
-        let scale_factor = window().scale_factor();
-        let window_width = window().inner_size().width / scale_factor as u32;
-
-        let max_width = 0.3 * window_width as f32;
-        let max_icons = (max_width / icon_total as f32).floor() as usize;
-
-        let visible_item_count = session_count.min(max_icons as u32);
-        visible_items.set(visible_item_count);
-
-        let hidden_count = session_count.saturating_sub(visible_item_count);
-        hidden_items.set(hidden_count);
-    });
-
     let color = *ICON_COLOR.read();
     let bg_color = *BG_COLOR_INVERTED.read();
     let text_color = *TEXT_COLOR_INVERTED.read();
@@ -65,16 +69,16 @@ fn SessionCount() -> Element {
     rsx! {
         div {
             class: "flex space-x-2 items-center justify-center",
-            if *hidden_items.read() > 0 {
+            if *HIDDEN_ITEMS.read() > 0 {
                 div {
                     class: format!("text-xs px-2 py-1 rounded-2xl text-center flex justify-center items-center {} {}", bg_color, text_color),
-                    "+{hidden_items}"
+                    "+{HIDDEN_ITEMS}"
                 }
             }
 
-            for i in 0..visible_items + 1 {
+            for i in 0..*VISIBLE_ITEMS.read() + 1 {
                 Icon {
-                    icon_type: if i == *visible_items.read() {
+                    icon_type: if i == *VISIBLE_ITEMS.read() {
                         IconType::CircleOutlined
                     } else {
                         IconType::CircleFilled
