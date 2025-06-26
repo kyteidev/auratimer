@@ -72,7 +72,7 @@ pub fn next_session() {
 pub fn revert_session() {
     let is_focus_mode = *IS_FOCUS_MODE.peek();
 
-    if !is_focus_mode {
+    if is_focus_mode {
         *SMALL_SESSION_COUNT.write() -= 1;
     }
 
