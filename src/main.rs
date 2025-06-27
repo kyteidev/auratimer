@@ -1,6 +1,6 @@
 mod sound;
 
-use std::sync::mpsc::channel;
+use std::{sync::mpsc::channel, time::Duration};
 
 use dioxus::{
     desktop::{
@@ -63,42 +63,20 @@ fn App() -> Element {
     init_colors();
 
     use_hook(|| {
-        let (tx, rx) = channel::<TrayIconEvent>();
-        *TRAY_EVENT_SENDER.lock().unwrap() = Some(tx);
-        *TRAY_EVENT_RECEIVER.lock().unwrap() = Some(rx);
-
-        let (window_tx, window_rx) = channel();
-        *WINDOW_COMMAND_SENDER.lock().unwrap() = Some(window_tx);
-        *WINDOW_COMMAND_RECEIVER.lock().unwrap() = Some(window_rx);
-
+        init_channels();
         init_tray();
         init_tray_handler();
         init_tray_listener();
-
-        let ns_view: *mut objc2::runtime::AnyObject = window().ns_view().cast();
-        unsafe {
-            let ns_window: *mut objc2::runtime::AnyObject = msg_send![ns_view, window];
-            if ns_window.is_null() {
-                error!("ns_window is null, unable to set transparent titlebar");
-            }
-            set_transparent_titlebar(ns_window);
-        }
-
-        let (timer_command_tx, timer_command_rx) = channel();
-        *TIMER_COMMAND_SENDER.lock().unwrap() = Some(timer_command_tx);
-        *TIMER_COMMAND_RECEIVER.lock().unwrap() = Some(timer_command_rx);
-
-        let (timer_event_tx, timer_event_rx) = channel();
-        *TIMER_EVENT_SENDER.lock().unwrap() = Some(timer_event_tx);
-        *TIMER_EVENT_RECEIVER.lock().unwrap() = Some(timer_event_rx);
+        setup_window();
         init_timer_event_listener();
     });
 
     use_future(move || async move {
+        let mut interval = tokio::time::interval(Duration::from_millis(200));
         loop {
+            interval.tick().await;
             handle_window_commands();
             handle_timer_commands();
-            tokio::time::sleep(std::time::Duration::from_millis(200)).await;
         }
     });
 
@@ -132,5 +110,38 @@ fn App() -> Element {
                 ControlButtons {}
             }
         }
+    }
+}
+
+fn init_channels() {
+    // Tray channels
+    let (tray_tx, tray_rx) = channel::<TrayIconEvent>();
+    *TRAY_EVENT_SENDER.lock().unwrap() = Some(tray_tx);
+    *TRAY_EVENT_RECEIVER.lock().unwrap() = Some(tray_rx);
+
+    // Window command channels
+    let (window_tx, window_rx) = channel();
+    *WINDOW_COMMAND_SENDER.lock().unwrap() = Some(window_tx);
+    *WINDOW_COMMAND_RECEIVER.lock().unwrap() = Some(window_rx);
+
+    // Timer channels
+    let (timer_command_tx, timer_command_rx) = channel();
+    *TIMER_COMMAND_SENDER.lock().unwrap() = Some(timer_command_tx);
+    *TIMER_COMMAND_RECEIVER.lock().unwrap() = Some(timer_command_rx);
+
+    let (timer_event_tx, timer_event_rx) = channel();
+    *TIMER_EVENT_SENDER.lock().unwrap() = Some(timer_event_tx);
+    *TIMER_EVENT_RECEIVER.lock().unwrap() = Some(timer_event_rx);
+}
+
+fn setup_window() {
+    let ns_view: *mut objc2::runtime::AnyObject = window().ns_view().cast();
+    unsafe {
+        let ns_window: *mut objc2::runtime::AnyObject = msg_send![ns_view, window];
+        if ns_window.is_null() {
+            error!("ns_window is null, unable to set transparent titlebar");
+            return;
+        }
+        set_transparent_titlebar(ns_window);
     }
 }
