@@ -1,4 +1,4 @@
 ## Auratimer
 
 ### Copyright
-Copyright © 2025 kyteidev. All rights reserved.
+Copyright © 2025 kyteidev. Licensed under MIT.
