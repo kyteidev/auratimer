@@ -1,4 +1,7 @@
+use std::sync::Mutex;
+
 use dioxus::{
+    desktop::tao::window::WindowId,
     hooks::use_effect,
     signals::{GlobalSignal, Readable},
 };
@@ -8,6 +11,11 @@ pub static IS_FOCUS_MODE: GlobalSignal<bool> = GlobalSignal::new(|| true);
 
 pub static SMALL_SESSION_COUNT: GlobalSignal<u32> = GlobalSignal::new(|| 0);
 pub static FULL_SESSION_COUNT: GlobalSignal<u32> = GlobalSignal::new(|| 0);
+
+pub static IS_FOCUS_MODE_MUTEX: Mutex<bool> = Mutex::new(false);
+pub static SMALL_SESSION_COUNT_MUTEX: Mutex<u32> = Mutex::new(0);
+
+pub static ALERT_WINDOW_ID: Mutex<Option<WindowId>> = Mutex::new(None);
 
 pub static BG_COLOR: GlobalSignal<&str> = GlobalSignal::new(|| "bg-blue-200");
 pub static BG_COLOR_HOVER: GlobalSignal<&str> = GlobalSignal::new(|| "hover:bg-blue-500");

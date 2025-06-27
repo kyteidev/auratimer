@@ -1,8 +1,8 @@
-use dioxus::prelude::*;
+use dioxus::{desktop::window, prelude::*};
 
 use crate::{
     components::timer::start_timer,
-    state::{IS_FOCUS_MODE, SMALL_SESSION_COUNT},
+    state::{ALERT_WINDOW_ID, IS_FOCUS_MODE, SMALL_SESSION_COUNT},
     ui::button::Button,
 };
 
@@ -27,7 +27,12 @@ pub fn TimerExpired() -> Element {
             }
             Button {
                 title: "Start timer",
-                action: start_timer,
+                action: move || {
+                    if let Some(id) = *ALERT_WINDOW_ID.lock().unwrap() {
+                        window().close_window(id);
+                    }
+                    start_timer();
+                },
                 class: "w-32 h-12 text-xl text-red-200",
                 text: if is_focus_mode {
                     "Start focus"

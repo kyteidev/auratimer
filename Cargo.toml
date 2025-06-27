@@ -7,6 +7,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+core-graphics = "0.25.0"
 dioxus = { version = "0.6.0", features = [] }
 objc2 = "0.6.1"
 rodio = "0.20.1"

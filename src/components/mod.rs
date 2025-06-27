@@ -1,3 +1,4 @@
+pub mod alert;
 pub mod control_buttons;
 pub mod info;
 pub mod timer;

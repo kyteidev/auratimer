@@ -1,9 +1,16 @@
 use std::time::Duration;
 
-use dioxus::prelude::*;
+use core_graphics::display::{CGDisplayBounds, CGGetActiveDisplayList, CGPoint};
+use dioxus::{
+    desktop::{window, Config, LogicalPosition, WindowBuilder},
+    prelude::*,
+};
 use tokio::time::Instant;
+use tracing::error;
+use tray_icon::dpi::LogicalSize;
 
 use crate::{
+    components::alert::Alert,
     sound::play_alarm,
     state::{
         BG_COLOR_HOVER, FULL_SESSION_COUNT, ICON_COLOR, IS_FOCUS_MODE, SMALL_SESSION_COUNT,
@@ -163,6 +170,8 @@ pub fn Timer() -> Element {
 
                                 *IS_FOCUS_MODE.write() = !is_focus_mode;
 
+                                show_alert_window();
+
                                 play_alarm();
                                 break;
                             }
@@ -210,4 +219,75 @@ fn update_tray(minutes: u32, seconds: u32) {
         "Break"
     };
     set_tray_title(format!("{}: {:02}:{:02}", session_type, minutes, seconds).as_str());
+}
+
+fn show_alert_window() {
+    let dom = VirtualDom::new(Alert);
+
+    let width = 600.0;
+    let height = 64.0;
+
+    let (active_display_id, display_width, _) = get_active_display_and_size();
+
+    let display_bounds = unsafe { CGDisplayBounds(active_display_id as u32) };
+
+    let x_pos = display_bounds.origin.x + (display_width / 2.0 - width / 2.0);
+    let y_pos = 64.0;
+
+    let config = Config::new()
+        .with_window(
+            WindowBuilder::new()
+                .with_inner_size(LogicalSize::new(width, height))
+                .with_position(LogicalPosition::new(x_pos, y_pos))
+                .with_closable(false)
+                .with_always_on_top(true)
+                .with_transparent(true)
+                .with_resizable(false)
+                .with_decorations(false),
+        )
+        .with_disable_context_menu(true);
+    window().new_window(dom, config);
+}
+
+extern "C" {
+    fn CGEventCreate(source: *const std::ffi::c_void) -> *mut std::ffi::c_void;
+    fn CGEventGetLocation(event: *mut std::ffi::c_void) -> CGPoint;
+    fn CFRelease(cf: *mut std::ffi::c_void);
+}
+
+fn get_active_display_and_size() -> (i32, f64, f64) {
+    let mouse_location = unsafe {
+        let event = CGEventCreate(std::ptr::null());
+        let loc = CGEventGetLocation(event);
+        CFRelease(event);
+        loc
+    };
+
+    // Get all active displays
+    let mut display_ids = [0u32; 16];
+    let mut display_count = 0;
+    unsafe {
+        CGGetActiveDisplayList(
+            display_ids.len() as u32,
+            display_ids.as_mut_ptr(),
+            &mut display_count,
+        );
+    }
+
+    for &display_id in &display_ids[..display_count as usize] {
+        let bounds = unsafe { CGDisplayBounds(display_id) };
+        if point_in_rect(mouse_location.x, mouse_location.y, &bounds) {
+            return (display_id as i32, bounds.size.width, bounds.size.height);
+        }
+    }
+    error!("Cursor is not on any detected display");
+
+    (1, 0.0, 0.0)
+}
+
+fn point_in_rect(x: f64, y: f64, rect: &core_graphics::geometry::CGRect) -> bool {
+    x >= rect.origin.x
+        && x < rect.origin.x + rect.size.width
+        && y >= rect.origin.y
+        && y < rect.origin.y + rect.size.height
 }

@@ -16,9 +16,19 @@ use tray_icon::TrayIconEvent;
 
 use crate::{
     components::{
-        control_buttons::ControlButtons, info::Info, timer::Timer, timer_expired::TimerExpired,
+        alert::{
+            handle_timer_commands, init_timer_event_listener, TIMER_COMMAND_RECEIVER,
+            TIMER_COMMAND_SENDER, TIMER_EVENT_RECEIVER, TIMER_EVENT_SENDER,
+        },
+        control_buttons::ControlButtons,
+        info::Info,
+        timer::Timer,
+        timer_expired::TimerExpired,
     },
-    state::{init_colors, BG_COLOR, TEXT_COLOR, TIMER_EXPIRED},
+    state::{
+        init_colors, BG_COLOR, IS_FOCUS_MODE, IS_FOCUS_MODE_MUTEX, SMALL_SESSION_COUNT,
+        SMALL_SESSION_COUNT_MUTEX, TEXT_COLOR, TIMER_EXPIRED,
+    },
     tray::{
         handle_window_commands, init_tray, init_tray_handler, init_tray_listener,
         TRAY_EVENT_RECEIVER, TRAY_EVENT_SENDER, WINDOW_COMMAND_RECEIVER, WINDOW_COMMAND_SENDER,
@@ -73,13 +83,28 @@ fn App() -> Element {
             }
             set_transparent_titlebar(ns_window);
         }
+
+        let (timer_command_tx, timer_command_rx) = channel();
+        *TIMER_COMMAND_SENDER.lock().unwrap() = Some(timer_command_tx);
+        *TIMER_COMMAND_RECEIVER.lock().unwrap() = Some(timer_command_rx);
+
+        let (timer_event_tx, timer_event_rx) = channel();
+        *TIMER_EVENT_SENDER.lock().unwrap() = Some(timer_event_tx);
+        *TIMER_EVENT_RECEIVER.lock().unwrap() = Some(timer_event_rx);
+        init_timer_event_listener();
     });
 
     use_future(move || async move {
         loop {
             handle_window_commands();
+            handle_timer_commands();
             tokio::time::sleep(std::time::Duration::from_millis(200)).await;
         }
+    });
+
+    use_effect(|| {
+        *IS_FOCUS_MODE_MUTEX.lock().unwrap() = *IS_FOCUS_MODE.read();
+        *SMALL_SESSION_COUNT_MUTEX.lock().unwrap() = *SMALL_SESSION_COUNT.read();
     });
 
     let bg_color = *BG_COLOR.read();
